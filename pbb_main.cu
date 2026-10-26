@@ -50,6 +50,34 @@ int bandwidthMemcpy( const uint32_t B     // desired CUDA block size ( <= 1024, 
 }
 
 /**
+ * Single-Pass Scan Project: an honest performance ceiling.
+ * `bandwidthMemcpy` above uses ONE element per thread, which cannot
+ *   saturate memory bandwidth (too little memory-level parallelism
+ *   per thread). CUDA's own device-to-device copy is the ceiling the
+ *   Merrill & Garland paper compares against.
+ */
+double bandwidthCudaMemcpy( const size_t N, int* d_in, int* d_out ) {
+    const size_t bytes = N * sizeof(int);
+    CUDASSERT(cudaMemcpy(d_out, d_in, bytes, cudaMemcpyDeviceToDevice)); // dry run
+
+    struct timeval t_start, t_end, t_diff;
+    gettimeofday(&t_start, NULL);
+    for(int i=0; i<RUNS_GPU; i++) {
+        cudaMemcpy(d_out, d_in, bytes, cudaMemcpyDeviceToDevice);
+    }
+    cudaDeviceSynchronize();
+    gettimeofday(&t_end, NULL);
+    CUDASSERT(cudaPeekAtLastError());
+
+    timeval_subtract(&t_diff, &t_end, &t_start);
+    uint64_t elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
+    double gigaBytesPerSec = 2 * bytes * 1.0e-3f / elapsed;
+    printf("cudaMemcpy D2D runs in: %lu microsecs, GB/sec: %.2f  [ceiling]\n\n\n"
+          , elapsed, gigaBytesPerSec);
+    return gigaBytesPerSec;
+}
+
+/**
  * Generic reduce for both the commutative and non-commutative case
  */
 template<class OP>
@@ -299,6 +327,88 @@ int sgmScanIncAddI32( const uint32_t B     // desired CUDA block size ( <= 1024,
     return 0;
 }
 
+/**
+ *******************************************************
+ * Single-Pass Scan Project, Step 1:
+ *******************************************************
+ * `scanIncAddI32` adjusted to test `scanBlockLevel`.
+ * Changes w.r.t. `scanIncAddI32`:
+ *   - `d_tmp` is gone (the kernel needs no auxiliary array);
+ *   - the sequential reference scans each chunk of
+ *     CHUNK*B elements INDEPENDENTLY, because that is the
+ *     semantics of step 1 -- not a device-wide scan;
+ *   - the bandwidth figure uses 2n (n read, n written) instead
+ *     of 3n, since this is a single pass over the data.
+ */
+int scanBlockAddI32( const uint32_t B
+                   , const size_t   N
+                   , int* h_in
+                   , int* d_in
+                   , int* d_out
+                   , double gbs_ceiling
+) {
+    const size_t mem_size = N * sizeof(int);
+    int* h_out = (int*)malloc(mem_size);
+    int* h_ref = (int*)malloc(mem_size);
+    cudaMemset(d_out, 0, N*sizeof(int));
+
+    const uint32_t epb = elemsPerBlock< Add<int> >(B);
+    printf("Scan Block-Level AddI32: CHUNK*B = %u elems/block, %u blocks, %zu KB shmem/block\n",
+           epb, (uint32_t)((N + epb - 1) / epb), (epb * sizeof(int)) / 1024);
+
+    scanBlockLevel< Add<int> >( B, N, d_out, d_in );   // dry run
+    CUDASSERT(cudaPeekAtLastError());
+
+    uint64_t elapsed;
+    struct timeval t_start, t_end, t_diff;
+    gettimeofday(&t_start, NULL);
+
+    for(int i=0; i<RUNS_GPU; i++) {
+        scanBlockLevel< Add<int> >( B, N, d_out, d_in );
+    }
+    cudaDeviceSynchronize();
+    gettimeofday(&t_end, NULL);
+
+    CUDASSERT(cudaPeekAtLastError());
+
+    timeval_subtract(&t_diff, &t_end, &t_start);
+    elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
+    double gigaBytesPerSec = N * (sizeof(int) + sizeof(int)) * 1.0e-3f / elapsed;
+    printf("Scan Block-Level AddI32 GPU Kernel runs in: %lu microsecs, GB/sec: %.2f\n"
+          , elapsed, gigaBytesPerSec);
+    if (gbs_ceiling > 0.0)
+        printf("  ... which is %.1f%% of the cudaMemcpy ceiling\n", 100.0*gigaBytesPerSec/gbs_ceiling);
+
+    { // sequential reference: each chunk scanned on its own
+        for(uint32_t beg = 0; beg < N; beg += epb) {
+            uint32_t end = beg + epb;
+            if (end > N) end = N;
+            int acc = 0;
+            for(uint32_t i = beg; i < end; i++) {
+                acc += h_in[i];
+                h_ref[i] = acc;
+            }
+        }
+    }
+
+    { // Validation
+        CUDASSERT(cudaMemcpy(h_out, d_out, mem_size, cudaMemcpyDeviceToHost));
+        for(uint32_t i = 0; i<N; i++) {
+            if(h_out[i] != h_ref[i]) {
+                printf("!!!INVALID!!!: Scan Block-Level AddI32 at index %d, dev-val: %d, host-val: %d\n"
+                      , i, h_out[i], h_ref[i]);
+                exit(1);
+            }
+        }
+        printf("Scan Block-Level AddI32: VALID result!\n\n");
+    }
+
+    free(h_out);
+    free(h_ref);
+
+    return 0;
+}
+
 int main(int argc, char * argv[]) {
     if (argc != 3) {
         printf("Usage: %s <array-length> <block-size>\n", argv[0]);
@@ -327,6 +437,7 @@ int main(int argc, char * argv[]) {
 
     // computing a "realistic/achievable" bandwidth figure
     bandwidthMemcpy(B, N, d_in, d_out);
+    double gbs_ceiling = bandwidthCudaMemcpy(N, d_in, d_out);
 
     { // test reduce
         printf("Testing Naive Reduce with Int32 Addition Operator:\n");
@@ -345,6 +456,10 @@ int main(int argc, char * argv[]) {
     { // inclusive scan and segmented scan with int addition
         scanIncAddI32   (B, N, h_in, d_in, d_out);
         sgmScanIncAddI32(B, N, h_in, d_in, d_out);
+    }
+
+    { // Single-Pass Scan Project, step 1
+        scanBlockAddI32 (B, N, h_in, d_in, d_out, gbs_ceiling);
     }
 
 

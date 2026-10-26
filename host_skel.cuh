@@ -217,6 +217,54 @@ void scanInc( const uint32_t     B     // desired CUDA block size ( <= 1024, mul
 }
 
 /**
+ *******************************************************
+ * Single-Pass Scan Project, Step 1:
+ *******************************************************
+ * `scanInc` adjusted to launch only `scanBlockKernel`.
+ * Changes w.r.t. `scanInc`:
+ *   - the `redAssocKernel` and `scan1Block` stages are gone:
+ *     a single kernel does all the work;
+ *   - `getNumBlocks` is gone. It existed only because
+ *     `scan1Block` had to scan the per-block results inside
+ *     ONE block, which forced num_blocks <= 1024 and hence
+ *     the virtualization loop. Without that stage we simply
+ *     spawn ceil(N / (CHUNK*B)) blocks;
+ *   - `d_tmp` is gone.
+ * NOTE: this does NOT compute a device-wide scan, see
+ *   `scanBlockKernel`.
+ */
+template<class OP>
+void scanBlockLevel( const uint32_t     B     // desired CUDA block size ( <= 1024, multiple of 32)
+                   , const size_t       N     // length of the input array
+                   , typename OP::RedElTp* d_out // device array of length: N
+                   , typename OP::InpElTp* d_in  // device array of length: N
+) {
+    const uint32_t inp_sz = sizeof(typename OP::InpElTp);
+    const uint32_t red_sz = sizeof(typename OP::RedElTp);
+    const uint32_t max_tp_size = (inp_sz > red_sz) ? inp_sz : red_sz;
+    const uint32_t CHUNK = ELEMS_PER_THREAD*4 / max_tp_size;
+    const uint32_t elems_per_block = CHUNK * B;
+    const uint32_t num_blocks = (N + elems_per_block - 1) / elems_per_block;
+    const size_t   shmem_size = elems_per_block * max_tp_size;
+
+    scanBlockKernel<OP, CHUNK><<< num_blocks, B, shmem_size >>>(d_out, d_in, N);
+}
+
+/**
+ * How many elements one CUDA block processes in `scanBlockLevel`.
+ * Needed host-side by the validation, which must scan chunk-by-chunk.
+ */
+template<class OP>
+uint32_t elemsPerBlock(const uint32_t B) {
+    const uint32_t inp_sz = sizeof(typename OP::InpElTp);
+    const uint32_t red_sz = sizeof(typename OP::RedElTp);
+    const uint32_t max_tp_size = (inp_sz > red_sz) ? inp_sz : red_sz;
+    const uint32_t CHUNK = ELEMS_PER_THREAD*4 / max_tp_size;
+    return CHUNK * B;
+}
+
+
+/**
  * Host Wrapper orchestraiting the execution of segmented-inclusive scan.
  * The implementation is similar to the one of the `scanInc`, except that
  * is adapted for segmented scan, i.e., the flag arrays and the lifted

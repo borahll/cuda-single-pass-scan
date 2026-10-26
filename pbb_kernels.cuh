@@ -731,6 +731,100 @@ scan3rdKernel ( typename OP::RedElTp* d_out
     }
 }
 
+/**
+ *******************************************************
+ * Single-Pass Scan Project, Step 1:
+ *******************************************************
+ * `scan3rdKernel` adjusted so that each CUDA block scans ONE
+ *   chunk of CHUNK*blockDim.x elements, independently of all
+ *   other blocks. Changes w.r.t. `scan3rdKernel`:
+ *     - the "virtualization" loop is removed: one block
+ *       processes exactly one chunk;
+ *     - parameters `d_tmp` and `num_seq_chunks` are removed,
+ *       together with the `accum` variable: a block knows
+ *       nothing about the blocks preceding it.
+ *   Everything else (steps 1-9 below) is unchanged.
+ * NOTE: the result is NOT a device-wide scan; each chunk is
+ *   scanned on its own. Steps 2-4 of the project add the
+ *   inter-block communication on top of this.
+ */
+template<class OP, int CHUNK>
+__global__ void
+scanBlockKernel ( typename OP::RedElTp* d_out
+                , typename OP::InpElTp* d_in
+                , uint32_t N
+) {
+    extern __shared__ char sh_mem[];
+    // shared memory for the input elements (types)
+    volatile typename OP::InpElTp* shmem_inp = (typename OP::InpElTp*)sh_mem;
+
+    // shared memory for the reduce-element type; it overlaps with the
+    //   `shmem_inp` since they are not going to be used in the same time.
+    volatile typename OP::RedElTp* shmem_red = (typename OP::RedElTp*)sh_mem;
+
+    // the current block start processing input elements from this offset:
+    uint32_t inp_block_offs = CHUNK * blockDim.x * blockIdx.x;
+
+    // register memory for storing the scanned elements.
+    typename OP::RedElTp chunk[CHUNK];
+
+    // 1. copy `CHUNK` input elements per thread from global to shared memory
+    //    in coalesced fashion (for global memory)
+    copyFromGlb2ShrMem<typename OP::InpElTp, CHUNK>
+              (inp_block_offs, N, OP::identInp(), d_in, shmem_inp);
+
+    // 2. each thread sequentially scans its `CHUNK` elements
+    //    and stores the result in the `chunk` array. The reduced
+    //    result is stored in `tmp`.
+    typename OP::RedElTp tmp = OP::identity();
+    uint32_t shmem_offset = threadIdx.x * CHUNK;
+    #pragma unroll
+    for (uint32_t i = 0; i < CHUNK; i++) {
+        typename OP::InpElTp elm = shmem_inp[shmem_offset + i];
+        typename OP::RedElTp red = OP::mapFun(elm);
+        tmp = OP::apply(tmp, red);
+        chunk[i] = tmp;
+    }
+    __syncthreads();
+
+    // 3. Each thread publishes in shared memory the reduced result of its
+    //    `CHUNK` elements
+    shmem_red[threadIdx.x] = tmp;
+    __syncthreads();
+
+    // 4. perform an intra-CUDA-block scan
+    tmp = scanIncBlock<OP>(shmem_red, threadIdx.x);
+    __syncthreads();
+
+    // 5. write the scan result back to shared memory
+    shmem_red[threadIdx.x] = tmp;
+    __syncthreads();
+
+    // 6. the previous element is read from shared memory in `tmp`:
+    //       it is the prefix of the previous threads in the current block.
+    tmp   = OP::identity();
+    if (threadIdx.x > 0)
+        tmp = OP::remVolatile(shmem_red[threadIdx.x-1]);
+    // KEEP this barrier: it separates the reads of `shmem_red[threadIdx.x-1]`
+    //   above from the writes to `shmem_red[threadIdx.x*CHUNK + i]` below,
+    //   which overlap. (In `scan3rdKernel` it sat after the `accum` update.)
+    __syncthreads();
+
+    // 9. the `tmp` prefix is accumulated to all the `CHUNK` elements
+    //      locally processed by the current thread (i.e., the ones
+    //      in `chunk` array hold in registers).
+    #pragma unroll
+    for (uint32_t i = 0; i < CHUNK; i++) {
+        shmem_red[threadIdx.x*CHUNK + i] = OP::apply(tmp, chunk[i]);
+    }
+    __syncthreads();
+
+    // 5. write back from shared to global memory in coalesced fashion.
+    copyFromShr2GlbMem<typename OP::RedElTp, CHUNK>
+              (inp_block_offs, N, d_out, shmem_red);
+}
+
+
 /*************************************************/
 /*************************************************/
 /*** Segmented Inclusive Scan Helpers & Kernel ***/
