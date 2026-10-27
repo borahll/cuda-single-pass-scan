@@ -238,7 +238,7 @@ void scanBlockLevel( const uint32_t     B     // desired CUDA block size ( <= 10
                    , const size_t       N     // length of the input array
                    , typename OP::RedElTp* d_out // device array of length: N
                    , typename OP::InpElTp* d_in  // device array of length: N
-                   , uint32_t *g_block_counter;
+                   , uint32_t *g_block_counter
 ) {
     const uint32_t inp_sz = sizeof(typename OP::InpElTp);
     const uint32_t red_sz = sizeof(typename OP::RedElTp);
