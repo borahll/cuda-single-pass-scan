@@ -356,7 +356,16 @@ int scanBlockAddI32( const uint32_t B
     printf("Scan Block-Level AddI32: CHUNK*B = %u elems/block, %u blocks, %zu KB shmem/block\n",
            epb, (uint32_t)((N + epb - 1) / epb), (epb * sizeof(int)) / 1024);
 
-    scanBlockLevel< Add<int> >( B, N, d_out, d_in );   // dry run
+
+    // Step 2, global block counter
+    // Unsure if i should put it here, since the counter needs to be passed the acutal scanBlockLevel as an argument
+    // But this way we reuse the block id memory between runs to save time on cudamalloc
+    
+    uint32_t* g_block_counter;
+    cudaMalloc(&g_block_counter, sizeof(uint32_t));
+
+    
+    scanBlockLevel< Add<int> >( B, N, d_out, d_in, g_block_counter);   // dry run
     CUDASSERT(cudaPeekAtLastError());
 
     uint64_t elapsed;
@@ -364,12 +373,16 @@ int scanBlockAddI32( const uint32_t B
     gettimeofday(&t_start, NULL);
 
     for(int i=0; i<RUNS_GPU; i++) {
-        scanBlockLevel< Add<int> >( B, N, d_out, d_in );
+        scanBlockLevel< Add<int> >( B, N, d_out, d_in, g_block_counter);
     }
     cudaDeviceSynchronize();
     gettimeofday(&t_end, NULL);
 
     CUDASSERT(cudaPeekAtLastError());
+
+
+    // Free step 2 block counter
+    cudaFree(g_block_counter);
 
     timeval_subtract(&t_diff, &t_end, &t_start);
     elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;

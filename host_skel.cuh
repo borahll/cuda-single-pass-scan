@@ -238,6 +238,7 @@ void scanBlockLevel( const uint32_t     B     // desired CUDA block size ( <= 10
                    , const size_t       N     // length of the input array
                    , typename OP::RedElTp* d_out // device array of length: N
                    , typename OP::InpElTp* d_in  // device array of length: N
+                   , uint32_t *g_block_counter;
 ) {
     const uint32_t inp_sz = sizeof(typename OP::InpElTp);
     const uint32_t red_sz = sizeof(typename OP::RedElTp);
@@ -247,7 +248,10 @@ void scanBlockLevel( const uint32_t     B     // desired CUDA block size ( <= 10
     const uint32_t num_blocks = (N + elems_per_block - 1) / elems_per_block;
     const size_t   shmem_size = elems_per_block * max_tp_size;
 
-    scanBlockKernel<OP, CHUNK><<< num_blocks, B, shmem_size >>>(d_out, d_in, N);
+    // Step 2, malloc global counter
+    cudaMemset(g_block_counter, 0, sizeof(uint32_t));    
+
+    scanBlockKernel<OP, CHUNK><<< num_blocks, B, shmem_size >>>(d_out, d_in, N, g_block_counter);
 }
 
 /**

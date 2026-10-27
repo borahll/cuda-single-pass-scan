@@ -753,7 +753,23 @@ __global__ void
 scanBlockKernel ( typename OP::RedElTp* d_out
                 , typename OP::InpElTp* d_in
                 , uint32_t N
+                , uint32_t *g_block_counter
 ) {
+
+
+    // step 2, global block counter
+    __shared__ uint32_t bid;
+
+    // only increment the block counter when the first thread spawns
+    if (threadIdx.x == 0) {
+        // atomic add also prevents race conditions
+        bid = atomicAdd(g_block_counter, 1);
+    }
+
+    // ensure that the threads gets the bid before
+    __syncthreads();
+
+
     extern __shared__ char sh_mem[];
     // shared memory for the input elements (types)
     volatile typename OP::InpElTp* shmem_inp = (typename OP::InpElTp*)sh_mem;
@@ -763,7 +779,7 @@ scanBlockKernel ( typename OP::RedElTp* d_out
     volatile typename OP::RedElTp* shmem_red = (typename OP::RedElTp*)sh_mem;
 
     // the current block start processing input elements from this offset:
-    uint32_t inp_block_offs = CHUNK * blockDim.x * blockIdx.x;
+    uint32_t inp_block_offs = CHUNK * blockDim.x * bid;
 
     // register memory for storing the scanned elements.
     typename OP::RedElTp chunk[CHUNK];
