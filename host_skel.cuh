@@ -238,6 +238,9 @@ void scanBlockLevel( const uint32_t     B     // desired CUDA block size ( <= 10
                    , const size_t       N     // length of the input array
                    , typename OP::RedElTp* d_out // device array of length: N
                    , typename OP::InpElTp* d_in  // device array of length: N
+                    , Status* Fs
+                    , typename OP::RedElTp* Ps
+                    , typename OP::RedElTp* As
                    , uint32_t *g_block_counter
 ) {
     const uint32_t inp_sz = sizeof(typename OP::InpElTp);
@@ -249,9 +252,32 @@ void scanBlockLevel( const uint32_t     B     // desired CUDA block size ( <= 10
     const size_t   shmem_size = elems_per_block * max_tp_size;
 
     // Step 2, malloc global counter
-    cudaMemset(g_block_counter, 0, sizeof(uint32_t));    
+    // Reset the block counter
+    cudaError_t err = cudaMemset(
+        g_block_counter, 0, sizeof(uint32_t)
+    );
 
-    scanBlockKernel<OP, CHUNK><<< num_blocks, B, shmem_size >>>(d_out, d_in, N, g_block_counter);
+    CUDASSERT(err);
+
+    // Reset status flags
+    err = cudaMemset(
+        Fs, 0, num_blocks * sizeof(Status)
+    );
+    CUDASSERT(err);
+
+    // Clear any previous recorded runtime error
+    cudaGetLastError();
+
+    // Launch kernel
+    scanBlockKernel<OP, CHUNK>
+        <<<num_blocks, B, shmem_size>>>(
+            d_out, d_in, N, Fs, Ps, As, g_block_counter
+        );
+
+    // Check immediately
+    err = cudaGetLastError();
+
+    CUDASSERT(err);
 }
 
 /**

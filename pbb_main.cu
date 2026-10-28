@@ -340,88 +340,187 @@ int sgmScanIncAddI32( const uint32_t B     // desired CUDA block size ( <= 1024,
  *   - the bandwidth figure uses 2n (n read, n written) instead
  *     of 3n, since this is a single pass over the data.
  */
-int scanBlockAddI32( const uint32_t B
-                   , const size_t   N
-                   , int* h_in
-                   , int* d_in
-                   , int* d_out
-                   , double gbs_ceiling
+int scanBlockAddI32(
+    const uint32_t B,
+    const size_t N,
+    int* h_in,
+    int* d_in,
+    int* d_out,
+    Status* Fs,
+    int* Ps,
+    int* As,
+    double gbs_ceiling
 ) {
     const size_t mem_size = N * sizeof(int);
+
     int* h_out = (int*)malloc(mem_size);
     int* h_ref = (int*)malloc(mem_size);
-    cudaMemset(d_out, 0, N*sizeof(int));
 
-    const uint32_t epb = elemsPerBlock< Add<int> >(B);
-    printf("Scan Block-Level AddI32: CHUNK*B = %u elems/block, %u blocks, %zu KB shmem/block\n",
-           epb, (uint32_t)((N + epb - 1) / epb), (epb * sizeof(int)) / 1024);
+    CUDASSERT(cudaMemset(d_out, 0, mem_size));
 
+    // Elements processed by each block
+    const uint32_t epb = elemsPerBlock<Add<int>>(B);
 
-    // Step 2, global block counter
-    // Unsure if i should put it here, since the counter needs to be passed the acutal scanBlockLevel as an argument
-    // But this way we reuse the block id memory between runs to save time on cudamalloc
-    
+    // Total number of CUDA blocks
+    const size_t numBlocks = (N + (size_t)epb - 1) / epb;
+
+    printf(
+        "Single-Pass Scan: %u elems/block, %zu blocks\n",
+        epb,
+        numBlocks
+    );
+
+    // Dynamic block counter
     uint32_t* g_block_counter;
-    cudaMalloc(&g_block_counter, sizeof(uint32_t));
 
-    
-    scanBlockLevel< Add<int> >( B, N, d_out, d_in, g_block_counter);   // dry run
-    CUDASSERT(cudaPeekAtLastError());
+    CUDASSERT(cudaMalloc(
+        (void**)&g_block_counter,
+        sizeof(uint32_t)
+    ));
+
+    // -------------------------
+    // DRY RUN
+    // -------------------------
+
+    CUDASSERT(cudaMemset(
+        g_block_counter,
+        0,
+        sizeof(uint32_t)
+    ));
+
+    CUDASSERT(cudaMemset(
+        Fs,
+        0,
+        numBlocks * sizeof(Status)
+    ));
+
+    scanBlockLevel<Add<int>>(
+        B, N, d_out, d_in,
+        Fs, Ps, As, g_block_counter
+    );
+
+    cudaError_t err = cudaGetLastError();
+
+    CUDASSERT(err);
+
+    err = cudaDeviceSynchronize();
+
+    CUDASSERT(err);
+
+    // -------------------------
+    // GPU BENCHMARK
+    // -------------------------
 
     uint64_t elapsed;
+
     struct timeval t_start, t_end, t_diff;
+
     gettimeofday(&t_start, NULL);
 
-    for(int i=0; i<RUNS_GPU; i++) {
-        scanBlockLevel< Add<int> >( B, N, d_out, d_in, g_block_counter);
-    }
-    cudaDeviceSynchronize();
-    gettimeofday(&t_end, NULL);
+    for (int i = 0; i < RUNS_GPU; i++) {
 
+        // Reset block numbering
+        CUDASSERT(cudaMemset(
+            g_block_counter,
+            0,
+            sizeof(uint32_t)
+        ));
+
+        // Reset status flags
+        CUDASSERT(cudaMemset(
+            Fs,
+            0,
+            numBlocks * sizeof(Status)
+        ));
+
+        // Single-pass scan
+        scanBlockLevel<Add<int>>(
+            B, N, d_out, d_in,
+            Fs, Ps, As, g_block_counter
+        );
+    }
+
+    CUDASSERT(cudaDeviceSynchronize());
     CUDASSERT(cudaPeekAtLastError());
 
+    gettimeofday(&t_end, NULL);
 
-    // Free step 2 block counter
+    // Free dynamic block counter
     cudaFree(g_block_counter);
 
-    timeval_subtract(&t_diff, &t_end, &t_start);
-    elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
-    double gigaBytesPerSec = N * (sizeof(int) + sizeof(int)) * 1.0e-3f / elapsed;
-    printf("Scan Block-Level AddI32 GPU Kernel runs in: %lu microsecs, GB/sec: %.2f\n"
-          , elapsed, gigaBytesPerSec);
-    if (gbs_ceiling > 0.0)
-        printf("  ... which is %.1f%% of the cudaMemcpy ceiling\n", 100.0*gigaBytesPerSec/gbs_ceiling);
+    timeval_subtract(
+        &t_diff,
+        &t_end,
+        &t_start
+    );
 
-    { // sequential reference: each chunk scanned on its own
-        for(uint32_t beg = 0; beg < N; beg += epb) {
-            uint32_t end = beg + epb;
-            if (end > N) end = N;
-            int acc = 0;
-            for(uint32_t i = beg; i < end; i++) {
-                acc += h_in[i];
-                h_ref[i] = acc;
-            }
+    elapsed =
+        (t_diff.tv_sec * 1e6 + t_diff.tv_usec)
+        / RUNS_GPU;
+
+    double gigaBytesPerSec =
+        2.0 * N * sizeof(int) * 1.0e-3 / elapsed;
+
+    printf(
+        "Single-Pass Scan GPU Kernel: %lu microsecs, GB/sec: %.2f\n",
+        elapsed,
+        gigaBytesPerSec
+    );
+
+    if (gbs_ceiling > 0.0) {
+        printf(
+            "This is %.1f%% of cudaMemcpy bandwidth\n",
+            100.0 * gigaBytesPerSec / gbs_ceiling
+        );
+    }
+
+    // -------------------------
+    // CPU REFERENCE
+    // -------------------------
+
+    int acc = 0;
+
+    for (size_t i = 0; i < N; i++) {
+        acc += h_in[i];
+        h_ref[i] = acc;
+    }
+
+    // -------------------------
+    // VALIDATION
+    // -------------------------
+
+    CUDASSERT(cudaMemcpy(
+        h_out,
+        d_out,
+        mem_size,
+        cudaMemcpyDeviceToHost
+    ));
+
+    for (size_t i = 0; i < N; i++) {
+
+        if (h_out[i] != h_ref[i]) {
+
+            printf(
+                "INVALID at index %zu: GPU=%d CPU=%d\n",
+                i,
+                h_out[i],
+                h_ref[i]
+            );
+
+            free(h_out);
+            free(h_ref);
+
+            return 1;
         }
     }
 
-    { // Validation
-        CUDASSERT(cudaMemcpy(h_out, d_out, mem_size, cudaMemcpyDeviceToHost));
-        for(uint32_t i = 0; i<N; i++) {
-            if(h_out[i] != h_ref[i]) {
-                printf("!!!INVALID!!!: Scan Block-Level AddI32 at index %d, dev-val: %d, host-val: %d\n"
-                      , i, h_out[i], h_ref[i]);
-                exit(1);
-            }
-        }
-        printf("Scan Block-Level AddI32: VALID result!\n\n");
-    }
+    printf("Single-Pass Scan: VALID result!\n\n");
 
     free(h_out);
     free(h_ref);
 
     return 0;
 }
-
 int main(int argc, char * argv[]) {
     if (argc != 3) {
         printf("Usage: %s <array-length> <block-size>\n", argv[0]);
@@ -452,6 +551,32 @@ int main(int argc, char * argv[]) {
     bandwidthMemcpy(B, N, d_in, d_out);
     double gbs_ceiling = bandwidthCudaMemcpy(N, d_in, d_out);
 
+    // Number of elements processed by each block
+    const uint32_t epb = elemsPerBlock<Add<int>>(B);
+
+    // Number of CUDA blocks
+    const size_t numBlocks = (N + (size_t)epb - 1) / epb;
+
+    // Global arrays for decoupled look-back
+    Status* Fs;
+    int* As;
+    int* Ps;
+
+    CUDASSERT(cudaMalloc(
+        (void**)&Fs,
+        numBlocks * sizeof(Status)
+    ));
+
+    CUDASSERT(cudaMalloc(
+        (void**)&As,
+        numBlocks * sizeof(int)
+    ));
+
+    CUDASSERT(cudaMalloc(
+        (void**)&Ps,
+        numBlocks * sizeof(int)
+    ));
+
     { // test reduce
         printf("Testing Naive Reduce with Int32 Addition Operator:\n");
         testGenRed< Add<int> >(B, N, h_in, d_in, false);
@@ -472,12 +597,14 @@ int main(int argc, char * argv[]) {
     }
 
     { // Single-Pass Scan Project, step 1
-        scanBlockAddI32 (B, N, h_in, d_in, d_out, gbs_ceiling);
+        cudaMemset(Fs, X, B);
+        scanBlockAddI32 (B, N, h_in, d_in, d_out, Fs, Ps, As, gbs_ceiling);
     }
-
-
     // cleanup memory
     free(h_in);
     cudaFree(d_in );
     cudaFree(d_out);
+    cudaFree(Fs);
+    cudaFree(As);
+    cudaFree(Ps);
 }
