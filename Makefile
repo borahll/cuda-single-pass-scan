@@ -19,5 +19,11 @@ $(PBB_MAIN): pbb_main.cu host_skel.cuh pbb_kernels.cuh constants.cuh
 run: $(PBB_MAIN)
 	./$(PBB_MAIN) $(N) $(B)
 
+test: $(PBB_MAIN)
+	./$(PBB_MAIN) 100 256
+	./$(PBB_MAIN) 6144 256
+	./$(PBB_MAIN) 6145 256
+	./$(PBB_MAIN) 100000 256
+	./$(PBB_MAIN) 100003565 256
 clean:
 	rm -f $(PBB_MAIN)

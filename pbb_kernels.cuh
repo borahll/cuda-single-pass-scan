@@ -2,7 +2,8 @@
 #define PBB_KERNELS
 
 #include <cuda_runtime.h>
-
+#include <cuda/atomic>
+using namespace cuda;
 /**
  * Naive memcpy kernel, for the purpose of comparing with
  * a more "realistic" bandwidth number.
@@ -753,6 +754,9 @@ __global__ void
 scanBlockKernel ( typename OP::RedElTp* d_out
                 , typename OP::InpElTp* d_in
                 , uint32_t N
+                , Status* Fs
+                , typename OP::RedElTp* Ps
+                , typename OP::RedElTp* As
                 , uint32_t *g_block_counter
 ) {
 
@@ -816,11 +820,51 @@ scanBlockKernel ( typename OP::RedElTp* d_out
     shmem_red[threadIdx.x] = tmp;
     __syncthreads();
 
+    typename OP::RedElTp blockAggregate;
+    __shared__ typename OP::RedElTp blockOffset;
+    if(threadIdx.x == 0){
+        blockAggregate = OP::remVolatile(shmem_red[blockDim.x - 1]);
+    }
+
+    if(threadIdx.x == 0){
+        if(bid == 0){
+            blockOffset = OP::identity();
+            Ps[bid] = blockAggregate;
+            atomic_ref<Status, thread_scope_device> flag(Fs[bid]);
+            flag.store(P, memory_order_release);
+        }
+        else{
+            As[bid] = blockAggregate; //this blocks agg.
+            atomic_ref<Status, thread_scope_device> myFlag(Fs[bid]);
+            myFlag.store(A, memory_order_release);
+            int blockNum = static_cast<int>(bid) - 1;
+            typename OP::RedElTp prefix = OP::identity();  
+            while(blockNum >= 0){
+                atomic_ref<Status, thread_scope_device> prevFlag(Fs[blockNum]); //the flag
+                Status currFlag = prevFlag.load(memory_order_acquire);
+                if(currFlag == P){
+                    prefix = OP::apply(Ps[blockNum], prefix);
+                    break;
+                }
+                else if(currFlag == A){
+                    prefix = OP::apply(As[blockNum], prefix);
+                    blockNum--;
+                }
+                //X will run again
+            }
+            blockOffset = prefix;
+            Ps[bid] = OP::apply(blockOffset, blockAggregate);
+            myFlag.store(P, memory_order_release);
+        }
+    }
+    __syncthreads();
+
     // 6. the previous element is read from shared memory in `tmp`:
     //       it is the prefix of the previous threads in the current block.
     tmp   = OP::identity();
     if (threadIdx.x > 0)
         tmp = OP::remVolatile(shmem_red[threadIdx.x-1]);
+    tmp = OP::apply(blockOffset, tmp);
     // KEEP this barrier: it separates the reads of `shmem_red[threadIdx.x-1]`
     //   above from the writes to `shmem_red[threadIdx.x*CHUNK + i]` below,
     //   which overlap. (In `scan3rdKernel` it sat after the `accum` update.)

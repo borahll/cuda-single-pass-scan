@@ -17,6 +17,12 @@
 #define ELEMS_PER_THREAD    24
 #endif
 
+typedef enum{
+    X,
+    A,
+    P
+}Status;
+
 uint32_t MAX_HWDTH;
 uint32_t MAX_BLOCK;
 uint32_t MAX_SHMEM;
