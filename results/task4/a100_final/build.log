@@ -1,0 +1,4 @@
+nvcc -O3 -std=c++17 -arch=sm_80 -DELEMS_PER_THREAD=24 -o test_pbb pbb_main.cu
+nvcc -O3 -std=c++17 -arch=sm_80 -DELEMS_PER_THREAD=24 -o bench_lookback bench_lookback.cu
+nvcc -O3 -std=c++17 -arch=sm_80 -DELEMS_PER_THREAD=24 -DLOOKBACK_DEBUG -o bench_lookback_debug bench_lookback.cu
+nvcc -O3 -std=c++17 -arch=sm_80 -DELEMS_PER_THREAD=24 -DLOOKBACK_DEBUG -DLOOKBACK_NO_P -o bench_lookback_nop bench_lookback.cu

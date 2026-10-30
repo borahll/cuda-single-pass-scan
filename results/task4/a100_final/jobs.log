@@ -1,0 +1,4 @@
+make_default rc=0 foreign_samples,mean_sm%=481 12.5 11:53:54
+stats rc=0 foreign_samples,mean_sm%=394 9.4 11:56:50
+ept12 rc=0 foreign_samples,mean_sm%=98 11.0 11:57:49
+ept6 rc=0 foreign_samples,mean_sm%=93 13.5 11:58:50

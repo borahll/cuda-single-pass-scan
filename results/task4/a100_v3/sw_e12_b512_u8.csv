@@ -1,0 +1,11 @@
+Device name: NVIDIA A100-PCIE-40GB
+Number of hardware threads: 221184
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm
+# u8: N=268435456, 24576 elems/block, 10923 blocks, 108 SMs
+u8,268435456,268435456,memcpy,398.34,1347.8,100.0,240.4,0
+u8,268435456,268435456,cub,957.44,560.7,41.6,100.0,0
+u8,268435456,268435456,serial,1566.72,342.7,25.4,61.1,1
+u8,268435456,268435456,warp_read,1589.25,337.8,25.1,60.2,1

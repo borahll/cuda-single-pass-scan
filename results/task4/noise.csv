@@ -1,0 +1,90 @@
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub
+# u32: N=67108864, 6144 elems/block, 10923 blocks, 2 blocks/SM x 16 SMs resident
+u32,268435456,67108864,memcpy,3732.93,143.8,100.0,100.1
+u32,268435456,67108864,cub,3734.91,143.7,99.9,100.0
+u32,268435456,67108864,serial,4730.66,113.5,78.9,79.0
+u32,268435456,67108864,warp_read,4700.99,114.2,79.4,79.4
+u32,268435456,67108864,warp_par,4598.88,116.7,81.2,81.2
+u32,268435456,67108864,skip,4827.78,111.2,77.3,77.4
+u32,268435456,67108864,serial+packed,4575.17,117.3,81.6,81.6
+u32,268435456,67108864,warp_read+packed,4732.80,113.4,78.9,78.9
+u32,268435456,67108864,warp_par+packed,4501.76,119.3,82.9,83.0
+u32,268435456,67108864,skip+packed,4604.26,116.6,81.1,81.1
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub
+# u64: N=33554432, 3072 elems/block, 10923 blocks, 2 blocks/SM x 16 SMs resident
+u64,268435456,33554432,memcpy,3752.45,143.1,100.0,99.8
+u64,268435456,33554432,cub,3745.50,143.3,100.2,100.0
+u64,268435456,33554432,serial,3876.70,138.5,96.8,96.6
+u64,268435456,33554432,warp_read,3921.47,136.9,95.7,95.5
+u64,268435456,33554432,warp_par,3977.41,135.0,94.3,94.2
+u64,268435456,33554432,skip,3994.72,134.4,93.9,93.8
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub
+# u32: N=67108864, 6144 elems/block, 10923 blocks, 2 blocks/SM x 16 SMs resident
+u32,268435456,67108864,memcpy,3732.90,143.8,100.0,99.8
+u32,268435456,67108864,cub,3725.66,144.1,100.2,100.0
+u32,268435456,67108864,serial,4764.48,112.7,78.3,78.2
+u32,268435456,67108864,warp_read,4719.97,113.7,79.1,78.9
+u32,268435456,67108864,warp_par,4615.94,116.3,80.9,80.7
+u32,268435456,67108864,skip,4867.04,110.3,76.7,76.5
+u32,268435456,67108864,serial+packed,4597.31,116.8,81.2,81.0
+u32,268435456,67108864,warp_read+packed,4763.84,112.7,78.4,78.2
+u32,268435456,67108864,warp_par+packed,4525.95,118.6,82.5,82.3
+u32,268435456,67108864,skip+packed,4622.56,116.1,80.8,80.6
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub
+# u64: N=33554432, 3072 elems/block, 10923 blocks, 2 blocks/SM x 16 SMs resident
+u64,268435456,33554432,memcpy,3749.70,143.2,100.0,99.9
+u64,268435456,33554432,cub,3745.18,143.3,100.1,100.0
+u64,268435456,33554432,serial,3880.99,138.3,96.6,96.5
+u64,268435456,33554432,warp_read,3921.92,136.9,95.6,95.5
+u64,268435456,33554432,warp_par,3985.31,134.7,94.1,94.0
+u64,268435456,33554432,skip,4002.34,134.1,93.7,93.6
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub
+# u32: N=67108864, 6144 elems/block, 10923 blocks, 2 blocks/SM x 16 SMs resident
+u32,268435456,67108864,memcpy,3727.49,144.0,100.0,100.0
+u32,268435456,67108864,cub,3727.81,144.0,100.0,100.0
+u32,268435456,67108864,serial,4741.12,113.2,78.6,78.6
+u32,268435456,67108864,warp_read,4750.91,113.0,78.5,78.5
+u32,268435456,67108864,warp_par,4642.53,115.6,80.3,80.3
+u32,268435456,67108864,skip,4874.66,110.1,76.5,76.5
+u32,268435456,67108864,serial+packed,4614.14,116.4,80.8,80.8
+u32,268435456,67108864,warp_read+packed,4770.30,112.5,78.1,78.1
+u32,268435456,67108864,warp_par+packed,4572.32,117.4,81.5,81.5
+u32,268435456,67108864,skip+packed,4630.37,115.9,80.5,80.5
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub
+# u64: N=33554432, 3072 elems/block, 10923 blocks, 2 blocks/SM x 16 SMs resident
+u64,268435456,33554432,memcpy,3754.82,143.0,100.0,100.0
+u64,268435456,33554432,cub,3756.54,142.9,100.0,100.0
+u64,268435456,33554432,serial,3885.73,138.2,96.6,96.7
+u64,268435456,33554432,warp_read,3917.47,137.0,95.8,95.9
+u64,268435456,33554432,warp_par,3980.06,134.9,94.3,94.4
+u64,268435456,33554432,skip,4005.98,134.0,93.7,93.8

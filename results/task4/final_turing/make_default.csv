@@ -1,0 +1,1584 @@
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=98304, 24576 elems/block, 4 blocks, 16 SMs
+u8,98304,98304,memcpy,5.79,33.9,100.0,213.3,0,-
+u8,98304,98304,cub,12.35,15.9,46.9,100.0,0,VALID
+u8,98304,98304,serial,22.53,8.7,25.7,54.8,1,VALID
+u8,98304,98304,warp_read,22.53,8.7,25.7,54.8,1,VALID
+u8,98304,98304,warp_par,22.53,8.7,25.7,54.8,1,VALID
+u8,98304,98304,skip,22.53,8.7,25.7,54.8,1,VALID
+u8,98304,98304,serial+packed,22.02,8.9,26.3,56.1,1,VALID
+u8,98304,98304,warp_read+packed,23.26,8.5,24.9,53.1,1,VALID
+u8,98304,98304,warp_par+packed,21.98,8.9,26.3,56.2,1,VALID
+u8,98304,98304,skip+packed,22.43,8.8,25.8,55.1,1,VALID
+u8,98304,98304,serial+local,11.30,17.4,51.3,109.3,2,VALID
+u8,98304,98304,warp_read+local,10.75,18.3,53.9,114.9,2,VALID
+u8,98304,98304,warp_par+local,10.69,18.4,54.2,115.6,2,VALID
+u8,98304,98304,warp_par4+local,10.94,18.0,52.9,112.9,2,VALID
+u8,98304,98304,warp_par_keep+local,10.50,18.7,55.2,117.7,2,VALID
+u8,98304,98304,warp_par4_keep+local,11.01,17.9,52.6,112.2,2,VALID
+u8,98304,98304,skip+local,11.20,17.6,51.7,110.3,2,VALID
+u8,98304,98304,serial+packed+local,10.24,19.2,56.6,120.6,2,VALID
+u8,98304,98304,warp_read+packed+local,10.24,19.2,56.6,120.6,2,VALID
+u8,98304,98304,warp_par+packed+local,10.24,19.2,56.6,120.6,2,VALID
+u8,98304,98304,warp_par4+packed+local,10.27,19.1,56.4,120.2,2,VALID
+u8,98304,98304,warp_par_keep+packed+local,10.24,19.2,56.6,120.6,2,VALID
+u8,98304,98304,warp_par4_keep+packed+local,10.24,19.2,56.6,120.6,2,VALID
+u8,98304,98304,skip+packed+local,10.18,19.3,56.9,121.4,2,VALID
+# u16: N=49152, 12288 elems/block, 4 blocks, 16 SMs
+u16,98304,49152,memcpy,5.63,34.9,100.0,181.8,0,-
+u16,98304,49152,cub,10.24,19.2,55.0,100.0,0,VALID
+u16,98304,49152,serial,16.90,11.6,33.3,60.6,2,VALID
+u16,98304,49152,warp_read,17.28,11.4,32.6,59.3,2,VALID
+u16,98304,49152,warp_par,16.38,12.0,34.4,62.5,2,VALID
+u16,98304,49152,skip,16.83,11.7,33.5,60.8,2,VALID
+u16,98304,49152,serial+packed,16.10,12.2,35.0,63.6,2,VALID
+u16,98304,49152,warp_read+packed,18.40,10.7,30.6,55.7,2,VALID
+u16,98304,49152,warp_par+packed,15.78,12.5,35.7,64.9,2,VALID
+u16,98304,49152,skip+packed,16.13,12.2,34.9,63.5,2,VALID
+u16,98304,49152,serial+local,11.01,17.9,51.2,93.0,2,VALID
+u16,98304,49152,warp_read+local,10.59,18.6,53.2,96.7,2,VALID
+u16,98304,49152,warp_par+local,10.43,18.8,54.0,98.2,2,VALID
+u16,98304,49152,warp_par4+local,10.69,18.4,52.7,95.8,2,VALID
+u16,98304,49152,warp_par_keep+local,10.50,18.7,53.7,97.6,2,VALID
+u16,98304,49152,warp_par4_keep+local,11.52,17.1,48.9,88.9,2,VALID
+u16,98304,49152,skip+local,11.58,17.0,48.6,88.4,2,VALID
+u16,98304,49152,serial+packed+local,10.05,19.6,56.1,101.9,2,VALID
+u16,98304,49152,warp_read+packed+local,10.24,19.2,55.0,100.0,2,VALID
+u16,98304,49152,warp_par+packed+local,10.18,19.3,55.3,100.6,2,VALID
+u16,98304,49152,warp_par4+packed+local,10.11,19.4,55.7,101.3,2,VALID
+u16,98304,49152,warp_par_keep+packed+local,9.79,20.1,57.5,104.6,2,VALID
+u16,98304,49152,warp_par4_keep+packed+local,10.11,19.4,55.7,101.3,2,VALID
+u16,98304,49152,skip+packed+local,10.05,19.6,56.1,101.9,2,VALID
+# f32: N=24576, 6144 elems/block, 4 blocks, 16 SMs
+# f32 cub max rel.err 0.00e+00
+f32,98304,24576,memcpy,5.47,35.9,100.0,181.3,0,-
+f32,98304,24576,cub,9.92,19.8,55.2,100.0,0,VALID
+# f32 serial max rel.err 0.00e+00
+# f32 serial max rel.err 0.00e+00
+# f32 serial max rel.err 0.00e+00
+f32,98304,24576,serial,12.77,15.4,42.9,77.7,2,VALID
+# f32 warp_read max rel.err 0.00e+00
+# f32 warp_read max rel.err 0.00e+00
+# f32 warp_read max rel.err 0.00e+00
+f32,98304,24576,warp_read,13.34,14.7,41.0,74.3,2,VALID
+# f32 warp_par max rel.err 0.00e+00
+# f32 warp_par max rel.err 0.00e+00
+# f32 warp_par max rel.err 0.00e+00
+f32,98304,24576,warp_par,11.97,16.4,45.7,82.9,2,VALID
+# f32 skip max rel.err 0.00e+00
+# f32 skip max rel.err 0.00e+00
+# f32 skip max rel.err 0.00e+00
+f32,98304,24576,skip,12.51,15.7,43.7,79.3,2,VALID
+# f32 serial+packed max rel.err 0.00e+00
+# f32 serial+packed max rel.err 0.00e+00
+# f32 serial+packed max rel.err 0.00e+00
+f32,98304,24576,serial+packed,11.87,16.6,46.1,83.6,2,VALID
+# f32 warp_read+packed max rel.err 0.00e+00
+# f32 warp_read+packed max rel.err 0.00e+00
+# f32 warp_read+packed max rel.err 0.00e+00
+f32,98304,24576,warp_read+packed,12.29,16.0,44.5,80.7,2,VALID
+# f32 warp_par+packed max rel.err 0.00e+00
+# f32 warp_par+packed max rel.err 0.00e+00
+# f32 warp_par+packed max rel.err 0.00e+00
+f32,98304,24576,warp_par+packed,12.29,16.0,44.5,80.7,2,VALID
+# f32 skip+packed max rel.err 0.00e+00
+# f32 skip+packed max rel.err 0.00e+00
+# f32 skip+packed max rel.err 0.00e+00
+f32,98304,24576,skip+packed,12.03,16.3,45.5,82.4,2,VALID
+# f32 serial+local max rel.err 0.00e+00
+# f32 serial+local max rel.err 0.00e+00
+# f32 serial+local max rel.err 0.00e+00
+f32,98304,24576,serial+local,11.17,17.6,49.0,88.8,2,VALID
+# f32 warp_read+local max rel.err 0.00e+00
+# f32 warp_read+local max rel.err 0.00e+00
+# f32 warp_read+local max rel.err 0.00e+00
+f32,98304,24576,warp_read+local,10.24,19.2,53.4,96.9,2,VALID
+# f32 warp_par+local max rel.err 0.00e+00
+# f32 warp_par+local max rel.err 0.00e+00
+# f32 warp_par+local max rel.err 0.00e+00
+f32,98304,24576,warp_par+local,10.24,19.2,53.4,96.9,2,VALID
+# f32 warp_par4+local max rel.err 0.00e+00
+# f32 warp_par4+local max rel.err 0.00e+00
+# f32 warp_par4+local max rel.err 0.00e+00
+f32,98304,24576,warp_par4+local,10.46,18.8,52.3,94.8,2,VALID
+# f32 warp_par_keep+local max rel.err 0.00e+00
+# f32 warp_par_keep+local max rel.err 0.00e+00
+# f32 warp_par_keep+local max rel.err 0.00e+00
+f32,98304,24576,warp_par_keep+local,10.14,19.4,53.9,97.8,2,VALID
+# f32 warp_par4_keep+local max rel.err 0.00e+00
+# f32 warp_par4_keep+local max rel.err 0.00e+00
+# f32 warp_par4_keep+local max rel.err 0.00e+00
+f32,98304,24576,warp_par4_keep+local,10.40,18.9,52.6,95.4,2,VALID
+# f32 skip+local max rel.err 0.00e+00
+# f32 skip+local max rel.err 0.00e+00
+# f32 skip+local max rel.err 0.00e+00
+f32,98304,24576,skip+local,10.69,18.4,51.2,92.8,2,VALID
+# f32 serial+packed+local max rel.err 0.00e+00
+# f32 serial+packed+local max rel.err 0.00e+00
+# f32 serial+packed+local max rel.err 0.00e+00
+f32,98304,24576,serial+packed+local,9.98,19.7,54.8,99.4,2,VALID
+# f32 warp_read+packed+local max rel.err 0.00e+00
+# f32 warp_read+packed+local max rel.err 0.00e+00
+# f32 warp_read+packed+local max rel.err 0.00e+00
+f32,98304,24576,warp_read+packed+local,9.60,20.5,57.0,103.3,2,VALID
+# f32 warp_par+packed+local max rel.err 0.00e+00
+# f32 warp_par+packed+local max rel.err 0.00e+00
+# f32 warp_par+packed+local max rel.err 0.00e+00
+f32,98304,24576,warp_par+packed+local,9.73,20.2,56.3,102.0,2,VALID
+# f32 warp_par4+packed+local max rel.err 0.00e+00
+# f32 warp_par4+packed+local max rel.err 0.00e+00
+# f32 warp_par4+packed+local max rel.err 0.00e+00
+f32,98304,24576,warp_par4+packed+local,10.08,19.5,54.3,98.4,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 0.00e+00
+# f32 warp_par_keep+packed+local max rel.err 0.00e+00
+# f32 warp_par_keep+packed+local max rel.err 0.00e+00
+f32,98304,24576,warp_par_keep+packed+local,9.98,19.7,54.8,99.4,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 0.00e+00
+# f32 warp_par4_keep+packed+local max rel.err 0.00e+00
+# f32 warp_par4_keep+packed+local max rel.err 0.00e+00
+f32,98304,24576,warp_par4_keep+packed+local,9.73,20.2,56.3,102.0,2,VALID
+# f32 skip+packed+local max rel.err 0.00e+00
+# f32 skip+packed+local max rel.err 0.00e+00
+# f32 skip+packed+local max rel.err 0.00e+00
+f32,98304,24576,skip+packed+local,10.05,19.6,54.5,98.7,2,VALID
+# u32: N=24576, 6144 elems/block, 4 blocks, 16 SMs
+u32,98304,24576,memcpy,5.50,35.7,100.0,180.8,0,-
+u32,98304,24576,cub,9.95,19.8,55.3,100.0,0,VALID
+u32,98304,24576,serial,12.70,15.5,43.3,78.3,2,VALID
+u32,98304,24576,warp_read,12.86,15.3,42.8,77.4,2,VALID
+u32,98304,24576,warp_par,12.03,16.3,45.7,82.7,2,VALID
+u32,98304,24576,skip,12.61,15.6,43.7,78.9,2,VALID
+u32,98304,24576,serial+packed,11.65,16.9,47.3,85.4,2,VALID
+u32,98304,24576,warp_read+packed,12.29,16.0,44.8,81.0,2,VALID
+u32,98304,24576,warp_par+packed,12.29,16.0,44.8,81.0,2,VALID
+u32,98304,24576,skip+packed,11.81,16.7,46.6,84.3,2,VALID
+u32,98304,24576,serial+local,10.82,18.2,50.9,92.0,2,VALID
+u32,98304,24576,warp_read+local,10.24,19.2,53.8,97.2,2,VALID
+u32,98304,24576,warp_par+local,10.24,19.2,53.8,97.2,2,VALID
+u32,98304,24576,warp_par4+local,10.46,18.8,52.6,95.1,2,VALID
+u32,98304,24576,warp_par_keep+local,10.27,19.1,53.6,96.9,2,VALID
+u32,98304,24576,warp_par4_keep+local,10.50,18.7,52.4,94.8,2,VALID
+u32,98304,24576,skip+local,10.82,18.2,50.9,92.0,2,VALID
+u32,98304,24576,serial+packed+local,10.05,19.6,54.8,99.0,2,VALID
+u32,98304,24576,warp_read+packed+local,10.24,19.2,53.8,97.2,2,VALID
+u32,98304,24576,warp_par+packed+local,9.73,20.2,56.6,102.3,2,VALID
+u32,98304,24576,warp_par4+packed+local,10.02,19.6,55.0,99.4,2,VALID
+u32,98304,24576,warp_par_keep+packed+local,10.18,19.3,54.1,97.8,2,VALID
+u32,98304,24576,warp_par4_keep+packed+local,10.08,19.5,54.6,98.7,2,VALID
+u32,98304,24576,skip+packed+local,10.14,19.4,54.3,98.1,2,VALID
+# u64: N=12288, 3072 elems/block, 4 blocks, 16 SMs
+u64,98304,12288,memcpy,5.89,33.4,100.0,204.9,0,-
+u64,98304,12288,cub,12.06,16.3,48.8,100.0,0,VALID
+u64,98304,12288,serial,12.48,15.8,47.2,96.7,2,VALID
+u64,98304,12288,warp_read,12.13,16.2,48.5,99.5,2,VALID
+u64,98304,12288,warp_par,12.29,16.0,47.9,98.2,2,VALID
+u64,98304,12288,skip,11.71,16.8,50.3,103.0,2,VALID
+u64,98304,12288,serial+packed,10.24,19.2,57.5,117.8,2,VALID
+u64,98304,12288,warp_read+packed,10.11,19.4,58.2,119.3,2,VALID
+u64,98304,12288,warp_par+packed,10.08,19.5,58.4,119.7,2,VALID
+u64,98304,12288,skip+packed,8.42,23.4,70.0,143.3,2,VALID
+u64,98304,12288,serial+local,8.70,22.6,67.6,138.6,2,VALID
+u64,98304,12288,warp_read+local,8.86,22.2,66.4,136.1,2,VALID
+u64,98304,12288,warp_par+local,8.29,23.7,71.0,145.6,2,VALID
+u64,98304,12288,warp_par4+local,8.38,23.5,70.2,143.9,2,VALID
+u64,98304,12288,warp_par_keep+local,8.19,24.0,71.9,147.3,2,VALID
+u64,98304,12288,warp_par4_keep+local,8.42,23.4,70.0,143.3,2,VALID
+u64,98304,12288,skip+local,8.61,22.8,68.4,140.1,2,VALID
+u64,98304,12288,serial+packed+local,8.13,24.2,72.4,148.4,2,VALID
+u64,98304,12288,warp_read+packed+local,8.06,24.4,73.0,149.6,2,VALID
+u64,98304,12288,warp_par+packed+local,7.97,24.7,73.9,151.4,2,VALID
+u64,98304,12288,warp_par4+packed+local,8.06,24.4,73.0,149.6,2,VALID
+u64,98304,12288,warp_par_keep+packed+local,7.68,25.6,76.7,157.1,2,VALID
+u64,98304,12288,warp_par4_keep+packed+local,8.10,24.3,72.7,149.0,2,VALID
+u64,98304,12288,skip+packed+local,8.19,24.0,71.9,147.3,2,VALID
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=262144, 24576 elems/block, 11 blocks, 16 SMs
+u8,262144,262144,memcpy,10.14,51.7,100.0,135.6,0,-
+u8,262144,262144,cub,13.76,38.1,73.7,100.0,0,VALID
+u8,262144,262144,serial,24.48,21.4,41.4,56.2,1,VALID
+u8,262144,262144,warp_read,23.65,22.2,42.9,58.2,1,VALID
+u8,262144,262144,warp_par,24.22,21.6,41.9,56.8,1,VALID
+u8,262144,262144,skip,24.58,21.3,41.3,56.0,1,VALID
+u8,262144,262144,serial+packed,23.97,21.9,42.3,57.4,1,VALID
+u8,262144,262144,warp_read+packed,23.14,22.7,43.8,59.5,1,VALID
+u8,262144,262144,warp_par+packed,23.14,22.7,43.8,59.5,1,VALID
+u8,262144,262144,skip+packed,24.58,21.3,41.3,56.0,1,VALID
+u8,262144,262144,serial+local,12.19,43.0,83.2,112.9,2,VALID
+u8,262144,262144,warp_read+local,12.29,42.7,82.6,112.0,2,VALID
+u8,262144,262144,warp_par+local,12.51,41.9,81.1,110.0,2,VALID
+u8,262144,262144,warp_par4+local,12.29,42.7,82.6,112.0,2,VALID
+u8,262144,262144,warp_par_keep+local,12.86,40.8,78.9,107.0,2,VALID
+u8,262144,262144,warp_par4_keep+local,13.25,39.6,76.6,103.9,2,VALID
+u8,262144,262144,skip+local,12.29,42.7,82.6,112.0,2,VALID
+u8,262144,262144,serial+packed+local,11.62,45.1,87.3,118.5,2,VALID
+u8,262144,262144,warp_read+packed+local,13.41,39.1,75.7,102.6,2,VALID
+u8,262144,262144,warp_par+packed+local,12.42,42.2,81.7,110.8,2,VALID
+u8,262144,262144,warp_par4+packed+local,11.87,44.2,85.4,115.9,2,VALID
+u8,262144,262144,warp_par_keep+packed+local,12.10,43.3,83.9,113.8,2,VALID
+u8,262144,262144,warp_par4_keep+packed+local,12.29,42.7,82.6,112.0,2,VALID
+u8,262144,262144,skip+packed+local,11.90,44.0,85.2,115.6,2,VALID
+# u16: N=131072, 12288 elems/block, 11 blocks, 16 SMs
+u16,262144,131072,memcpy,5.86,89.5,100.0,183.1,0,-
+u16,262144,131072,cub,10.72,48.9,54.6,100.0,0,VALID
+u16,262144,131072,serial,16.77,31.3,34.9,63.9,2,VALID
+u16,262144,131072,warp_read,17.47,30.0,33.5,61.4,2,VALID
+u16,262144,131072,warp_par,16.26,32.3,36.0,65.9,2,VALID
+u16,262144,131072,skip,16.96,30.9,34.5,63.2,2,VALID
+u16,262144,131072,serial+packed,16.22,32.3,36.1,66.1,2,VALID
+u16,262144,131072,warp_read+packed,18.08,29.0,32.4,59.3,2,VALID
+u16,262144,131072,warp_par+packed,15.68,33.4,37.3,68.4,2,VALID
+u16,262144,131072,skip+packed,16.35,32.1,35.8,65.6,2,VALID
+u16,262144,131072,serial+local,12.06,43.5,48.5,88.9,2,VALID
+u16,262144,131072,warp_read+local,11.71,44.8,50.0,91.5,2,VALID
+u16,262144,131072,warp_par+local,11.68,44.9,50.1,91.8,2,VALID
+u16,262144,131072,warp_par4+local,12.29,42.7,47.7,87.2,2,VALID
+u16,262144,131072,warp_par_keep+local,11.81,44.4,49.6,90.8,2,VALID
+u16,262144,131072,warp_par4_keep+local,11.74,44.6,49.9,91.3,2,VALID
+u16,262144,131072,skip+local,11.87,44.2,49.3,90.3,2,VALID
+u16,262144,131072,serial+packed+local,11.33,46.3,51.7,94.6,2,VALID
+u16,262144,131072,warp_read+packed+local,13.06,40.2,44.9,82.1,2,VALID
+u16,262144,131072,warp_par+packed+local,11.20,46.8,52.3,95.7,2,VALID
+u16,262144,131072,warp_par4+packed+local,11.74,44.6,49.9,91.3,2,VALID
+u16,262144,131072,warp_par_keep+packed+local,11.62,45.1,50.4,92.3,2,VALID
+u16,262144,131072,warp_par4_keep+packed+local,11.49,45.6,51.0,93.3,2,VALID
+u16,262144,131072,skip+packed+local,10.98,47.8,53.4,97.7,2,VALID
+# f32: N=65536, 6144 elems/block, 11 blocks, 16 SMs
+# f32 cub max rel.err 4.75e-07
+f32,262144,65536,memcpy,5.60,93.6,100.0,178.9,0,-
+f32,262144,65536,cub,10.02,52.3,55.9,100.0,0,VALID
+# f32 serial max rel.err 2.10e-07
+# f32 serial max rel.err 2.10e-07
+# f32 serial max rel.err 2.10e-07
+f32,262144,65536,serial,12.61,41.6,44.4,79.4,2,VALID
+# f32 warp_read max rel.err 2.10e-07
+# f32 warp_read max rel.err 2.10e-07
+# f32 warp_read max rel.err 2.10e-07
+f32,262144,65536,warp_read,12.58,41.7,44.5,79.6,2,VALID
+# f32 warp_par max rel.err 2.10e-07
+# f32 warp_par max rel.err 2.10e-07
+# f32 warp_par max rel.err 2.10e-07
+f32,262144,65536,warp_par,12.80,41.0,43.7,78.3,2,VALID
+# f32 skip max rel.err 2.10e-07
+# f32 skip max rel.err 2.10e-07
+# f32 skip max rel.err 2.10e-07
+f32,262144,65536,skip,14.37,36.5,39.0,69.7,2,VALID
+# f32 serial+packed max rel.err 2.10e-07
+# f32 serial+packed max rel.err 2.10e-07
+# f32 serial+packed max rel.err 2.10e-07
+f32,262144,65536,serial+packed,12.00,43.7,46.7,83.5,2,VALID
+# f32 warp_read+packed max rel.err 2.10e-07
+# f32 warp_read+packed max rel.err 2.10e-07
+# f32 warp_read+packed max rel.err 2.10e-07
+f32,262144,65536,warp_read+packed,11.94,43.9,46.9,83.9,2,VALID
+# f32 warp_par+packed max rel.err 2.10e-07
+# f32 warp_par+packed max rel.err 2.10e-07
+# f32 warp_par+packed max rel.err 2.10e-07
+f32,262144,65536,warp_par+packed,11.94,43.9,46.9,83.9,2,VALID
+# f32 skip+packed max rel.err 2.10e-07
+# f32 skip+packed max rel.err 2.10e-07
+# f32 skip+packed max rel.err 2.10e-07
+f32,262144,65536,skip+packed,12.03,43.6,46.5,83.2,2,VALID
+# f32 serial+local max rel.err 6.77e-07
+# f32 serial+local max rel.err 6.77e-07
+# f32 serial+local max rel.err 6.77e-07
+f32,262144,65536,serial+local,10.43,50.3,53.7,96.0,2,VALID
+# f32 warp_read+local max rel.err 6.77e-07
+# f32 warp_read+local max rel.err 6.77e-07
+# f32 warp_read+local max rel.err 6.77e-07
+f32,262144,65536,warp_read+local,9.57,54.8,58.5,104.7,2,VALID
+# f32 warp_par+local max rel.err 6.77e-07
+# f32 warp_par+local max rel.err 6.77e-07
+# f32 warp_par+local max rel.err 6.77e-07
+f32,262144,65536,warp_par+local,9.50,55.2,58.9,105.4,2,VALID
+# f32 warp_par4+local max rel.err 6.77e-07
+# f32 warp_par4+local max rel.err 6.77e-07
+# f32 warp_par4+local max rel.err 6.77e-07
+f32,262144,65536,warp_par4+local,10.08,52.0,55.6,99.4,2,VALID
+# f32 warp_par_keep+local max rel.err 6.77e-07
+# f32 warp_par_keep+local max rel.err 6.77e-07
+# f32 warp_par_keep+local max rel.err 6.77e-07
+f32,262144,65536,warp_par_keep+local,9.98,52.5,56.1,100.3,2,VALID
+# f32 warp_par4_keep+local max rel.err 6.77e-07
+# f32 warp_par4_keep+local max rel.err 6.77e-07
+# f32 warp_par4_keep+local max rel.err 6.77e-07
+f32,262144,65536,warp_par4_keep+local,10.05,52.2,55.7,99.7,2,VALID
+# f32 skip+local max rel.err 6.77e-07
+# f32 skip+local max rel.err 6.77e-07
+# f32 skip+local max rel.err 6.77e-07
+f32,262144,65536,skip+local,11.04,47.5,50.7,90.7,2,VALID
+# f32 serial+packed+local max rel.err 6.77e-07
+# f32 serial+packed+local max rel.err 6.77e-07
+# f32 serial+packed+local max rel.err 6.77e-07
+f32,262144,65536,serial+packed+local,9.54,55.0,58.7,105.0,2,VALID
+# f32 warp_read+packed+local max rel.err 6.77e-07
+# f32 warp_read+packed+local max rel.err 6.77e-07
+# f32 warp_read+packed+local max rel.err 6.77e-07
+f32,262144,65536,warp_read+packed+local,9.79,53.5,57.2,102.3,2,VALID
+# f32 warp_par+packed+local max rel.err 6.77e-07
+# f32 warp_par+packed+local max rel.err 6.77e-07
+# f32 warp_par+packed+local max rel.err 6.77e-07
+f32,262144,65536,warp_par+packed+local,9.28,56.5,60.3,107.9,2,VALID
+# f32 warp_par4+packed+local max rel.err 6.77e-07
+# f32 warp_par4+packed+local max rel.err 6.77e-07
+# f32 warp_par4+packed+local max rel.err 6.77e-07
+f32,262144,65536,warp_par4+packed+local,9.38,55.9,59.7,106.8,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 6.77e-07
+# f32 warp_par_keep+packed+local max rel.err 6.77e-07
+# f32 warp_par_keep+packed+local max rel.err 6.77e-07
+f32,262144,65536,warp_par_keep+packed+local,9.02,58.1,62.1,111.0,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 6.77e-07
+# f32 warp_par4_keep+packed+local max rel.err 6.77e-07
+# f32 warp_par4_keep+packed+local max rel.err 6.77e-07
+f32,262144,65536,warp_par4_keep+packed+local,9.12,57.5,61.4,109.8,2,VALID
+# f32 skip+packed+local max rel.err 6.77e-07
+# f32 skip+packed+local max rel.err 6.77e-07
+# f32 skip+packed+local max rel.err 6.77e-07
+f32,262144,65536,skip+packed+local,10.24,51.2,54.7,97.8,2,VALID
+# u32: N=65536, 6144 elems/block, 11 blocks, 16 SMs
+u32,262144,65536,memcpy,6.21,84.5,100.0,188.7,0,-
+u32,262144,65536,cub,11.71,44.8,53.0,100.0,0,VALID
+u32,262144,65536,serial,13.86,37.8,44.8,84.5,2,VALID
+u32,262144,65536,warp_read,14.11,37.2,44.0,83.0,2,VALID
+u32,262144,65536,warp_par,12.74,41.2,48.7,92.0,2,VALID
+u32,262144,65536,skip,14.14,37.1,43.9,82.8,2,VALID
+u32,262144,65536,serial+packed,12.45,42.1,49.9,94.1,2,VALID
+u32,262144,65536,warp_read+packed,14.24,36.8,43.6,82.2,2,VALID
+u32,262144,65536,warp_par+packed,15.14,34.6,41.0,77.4,2,VALID
+u32,262144,65536,skip+packed,12.29,42.7,50.5,95.3,2,VALID
+u32,262144,65536,serial+local,10.50,50.0,59.1,111.6,2,VALID
+u32,262144,65536,warp_read+local,9.89,53.0,62.8,118.4,2,VALID
+u32,262144,65536,warp_par+local,11.49,45.6,54.0,101.9,2,VALID
+u32,262144,65536,warp_par4+local,11.84,44.3,52.4,98.9,2,VALID
+u32,262144,65536,warp_par_keep+local,12.13,43.2,51.2,96.6,2,VALID
+u32,262144,65536,warp_par4_keep+local,10.11,51.8,61.4,115.8,2,VALID
+u32,262144,65536,skip+local,11.10,47.2,55.9,105.5,2,VALID
+u32,262144,65536,serial+packed+local,9.28,56.5,66.9,126.2,2,VALID
+u32,262144,65536,warp_read+packed+local,9.02,58.1,68.8,129.8,2,VALID
+u32,262144,65536,warp_par+packed+local,8.96,58.5,69.3,130.7,2,VALID
+u32,262144,65536,warp_par4+packed+local,10.24,51.2,60.6,114.4,2,VALID
+u32,262144,65536,warp_par_keep+packed+local,9.25,56.7,67.1,126.6,2,VALID
+u32,262144,65536,warp_par4_keep+packed+local,9.63,54.4,64.5,121.6,2,VALID
+u32,262144,65536,skip+packed+local,10.21,51.4,60.8,114.7,2,VALID
+# u64: N=32768, 3072 elems/block, 11 blocks, 16 SMs
+u64,262144,32768,memcpy,5.86,89.5,100.0,174.9,0,-
+u64,262144,32768,cub,10.24,51.2,57.2,100.0,0,VALID
+u64,262144,32768,serial,10.85,48.3,54.0,94.4,2,VALID
+u64,262144,32768,warp_read,10.53,49.8,55.6,97.3,2,VALID
+u64,262144,32768,warp_par,12.29,42.7,47.7,83.3,2,VALID
+u64,262144,32768,skip,12.48,42.0,46.9,82.1,2,VALID
+u64,262144,32768,serial+packed,10.24,51.2,57.2,100.0,2,VALID
+u64,262144,32768,warp_read+packed,10.08,52.0,58.1,101.6,2,VALID
+u64,262144,32768,warp_par+packed,9.95,52.7,58.8,102.9,2,VALID
+u64,262144,32768,skip+packed,10.37,50.6,56.5,98.8,2,VALID
+u64,262144,32768,serial+local,10.30,50.9,56.8,99.4,2,VALID
+u64,262144,32768,warp_read+local,10.82,48.5,54.1,94.7,2,VALID
+u64,262144,32768,warp_par+local,10.98,47.8,53.4,93.3,2,VALID
+u64,262144,32768,warp_par4+local,9.70,54.1,60.4,105.6,2,VALID
+u64,262144,32768,warp_par_keep+local,9.22,56.9,63.5,111.1,2,VALID
+u64,262144,32768,warp_par4_keep+local,9.89,53.0,59.2,103.6,2,VALID
+u64,262144,32768,skip+local,11.20,46.8,52.3,91.4,2,VALID
+u64,262144,32768,serial+packed+local,9.86,53.2,59.4,103.9,2,VALID
+u64,262144,32768,warp_read+packed+local,9.86,53.2,59.4,103.9,2,VALID
+u64,262144,32768,warp_par+packed+local,9.06,57.9,64.7,113.1,2,VALID
+u64,262144,32768,warp_par4+packed+local,9.57,54.8,61.2,107.0,2,VALID
+u64,262144,32768,warp_par_keep+packed+local,9.54,55.0,61.4,107.4,2,VALID
+u64,262144,32768,warp_par4_keep+packed+local,10.14,51.7,57.7,100.9,2,VALID
+u64,262144,32768,skip+packed+local,10.24,51.2,57.2,100.0,2,VALID
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=1048576, 24576 elems/block, 43 blocks, 16 SMs
+u8,1048576,1048576,memcpy,16.19,129.5,100.0,187.2,0,-
+u8,1048576,1048576,cub,30.30,69.2,53.4,100.0,0,VALID
+u8,1048576,1048576,serial,66.53,31.5,24.3,45.6,1,VALID
+u8,1048576,1048576,warp_read,65.28,32.1,24.8,46.4,1,VALID
+u8,1048576,1048576,warp_par,65.28,32.1,24.8,46.4,1,VALID
+u8,1048576,1048576,skip,65.47,32.0,24.7,46.3,1,VALID
+u8,1048576,1048576,serial+packed,64.54,32.5,25.1,47.0,1,VALID
+u8,1048576,1048576,warp_read+packed,64.51,32.5,25.1,47.0,1,VALID
+u8,1048576,1048576,warp_par+packed,64.42,32.6,25.1,47.0,1,VALID
+u8,1048576,1048576,skip+packed,63.97,32.8,25.3,47.4,1,VALID
+u8,1048576,1048576,serial+local,28.67,73.1,56.5,105.7,2,VALID
+u8,1048576,1048576,warp_read+local,28.00,74.9,57.8,108.2,2,VALID
+u8,1048576,1048576,warp_par+local,28.51,73.6,56.8,106.3,2,VALID
+u8,1048576,1048576,warp_par4+local,30.72,68.3,52.7,98.6,2,VALID
+u8,1048576,1048576,warp_par_keep+local,28.22,74.3,57.4,107.4,2,VALID
+u8,1048576,1048576,warp_par4_keep+local,28.51,73.6,56.8,106.3,2,VALID
+u8,1048576,1048576,skip+local,28.51,73.6,56.8,106.3,2,VALID
+u8,1048576,1048576,serial+packed+local,28.64,73.2,56.5,105.8,2,VALID
+u8,1048576,1048576,warp_read+packed+local,27.33,76.7,59.3,110.9,2,VALID
+u8,1048576,1048576,warp_par+packed+local,30.43,68.9,53.2,99.6,2,VALID
+u8,1048576,1048576,warp_par4+packed+local,27.94,75.1,58.0,108.5,2,VALID
+u8,1048576,1048576,warp_par_keep+packed+local,27.84,75.3,58.2,108.9,2,VALID
+u8,1048576,1048576,warp_par4_keep+packed+local,29.47,71.2,54.9,102.8,2,VALID
+u8,1048576,1048576,skip+packed+local,28.67,73.1,56.5,105.7,2,VALID
+# u16: N=524288, 12288 elems/block, 43 blocks, 16 SMs
+u16,1048576,524288,memcpy,17.34,120.9,100.0,123.8,0,-
+u16,1048576,524288,cub,21.47,97.7,80.8,100.0,0,VALID
+u16,1048576,524288,serial,47.71,44.0,36.4,45.0,2,VALID
+u16,1048576,524288,warp_read,48.74,43.0,35.6,44.1,2,VALID
+u16,1048576,524288,warp_par,48.38,43.3,35.8,44.4,2,VALID
+u16,1048576,524288,skip,48.48,43.3,35.8,44.3,2,VALID
+u16,1048576,524288,serial+packed,46.66,44.9,37.2,46.0,2,VALID
+u16,1048576,524288,warp_read+packed,47.10,44.5,36.8,45.6,2,VALID
+u16,1048576,524288,warp_par+packed,46.53,45.1,37.3,46.1,2,VALID
+u16,1048576,524288,skip+packed,46.27,45.3,37.5,46.4,2,VALID
+u16,1048576,524288,serial+local,27.39,76.6,63.3,78.4,2,VALID
+u16,1048576,524288,warp_read+local,30.72,68.3,56.5,69.9,2,VALID
+u16,1048576,524288,warp_par+local,27.33,76.7,63.5,78.6,2,VALID
+u16,1048576,524288,warp_par4+local,30.94,67.8,56.0,69.4,2,VALID
+u16,1048576,524288,warp_par_keep+local,29.54,71.0,58.7,72.7,2,VALID
+u16,1048576,524288,warp_par4_keep+local,29.28,71.6,59.2,73.3,2,VALID
+u16,1048576,524288,skip+local,30.11,69.6,57.6,71.3,2,VALID
+u16,1048576,524288,serial+packed+local,26.62,78.8,65.1,80.6,2,VALID
+u16,1048576,524288,warp_read+packed+local,26.72,78.5,64.9,80.4,2,VALID
+u16,1048576,524288,warp_par+packed+local,26.56,79.0,65.3,80.8,2,VALID
+u16,1048576,524288,warp_par4+packed+local,26.85,78.1,64.6,80.0,2,VALID
+u16,1048576,524288,warp_par_keep+packed+local,26.62,78.8,65.1,80.6,2,VALID
+u16,1048576,524288,warp_par4_keep+packed+local,26.62,78.8,65.1,80.6,2,VALID
+u16,1048576,524288,skip+packed+local,26.82,78.2,64.7,80.1,2,VALID
+# f32: N=262144, 6144 elems/block, 43 blocks, 16 SMs
+# f32 cub max rel.err 5.50e-07
+f32,1048576,262144,memcpy,16.38,128.0,100.0,131.2,0,-
+f32,1048576,262144,cub,21.50,97.5,76.2,100.0,0,VALID
+# f32 serial max rel.err 2.31e-07
+# f32 serial max rel.err 2.12e-07
+# f32 serial max rel.err 2.12e-07
+f32,1048576,262144,serial,30.88,67.9,53.1,69.6,2,VALID
+# f32 warp_read max rel.err 3.31e-07
+# f32 warp_read max rel.err 3.31e-07
+# f32 warp_read max rel.err 2.31e-07
+f32,1048576,262144,warp_read,34.05,61.6,48.1,63.2,2,VALID
+# f32 warp_par max rel.err 2.12e-07
+# f32 warp_par max rel.err 2.12e-07
+# f32 warp_par max rel.err 2.12e-07
+f32,1048576,262144,warp_par,33.50,62.6,48.9,64.2,2,VALID
+# f32 skip max rel.err 2.31e-07
+# f32 skip max rel.err 2.31e-07
+# f32 skip max rel.err 2.31e-07
+f32,1048576,262144,skip,32.77,64.0,50.0,65.6,2,VALID
+# f32 serial+packed max rel.err 2.21e-07
+# f32 serial+packed max rel.err 2.31e-07
+# f32 serial+packed max rel.err 2.31e-07
+f32,1048576,262144,serial+packed,32.61,64.3,50.2,65.9,2,VALID
+# f32 warp_read+packed max rel.err 2.31e-07
+# f32 warp_read+packed max rel.err 3.31e-07
+# f32 warp_read+packed max rel.err 3.31e-07
+f32,1048576,262144,warp_read+packed,33.44,62.7,49.0,64.3,2,VALID
+# f32 warp_par+packed max rel.err 2.12e-07
+# f32 warp_par+packed max rel.err 2.12e-07
+# f32 warp_par+packed max rel.err 2.12e-07
+f32,1048576,262144,warp_par+packed,32.10,65.3,51.0,67.0,2,VALID
+# f32 skip+packed max rel.err 2.31e-07
+# f32 skip+packed max rel.err 2.31e-07
+# f32 skip+packed max rel.err 2.21e-07
+f32,1048576,262144,skip+packed,31.30,67.0,52.4,68.7,2,VALID
+# f32 serial+local max rel.err 6.67e-07
+# f32 serial+local max rel.err 6.67e-07
+# f32 serial+local max rel.err 6.67e-07
+f32,1048576,262144,serial+local,24.90,84.2,65.8,86.4,2,VALID
+# f32 warp_read+local max rel.err 6.67e-07
+# f32 warp_read+local max rel.err 6.95e-07
+# f32 warp_read+local max rel.err 6.95e-07
+f32,1048576,262144,warp_read+local,22.53,93.1,72.7,95.5,2,VALID
+# f32 warp_par+local max rel.err 6.67e-07
+# f32 warp_par+local max rel.err 6.67e-07
+# f32 warp_par+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par+local,23.01,91.1,71.2,93.5,2,VALID
+# f32 warp_par4+local max rel.err 6.67e-07
+# f32 warp_par4+local max rel.err 6.67e-07
+# f32 warp_par4+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par4+local,23.42,89.5,69.9,91.8,2,VALID
+# f32 warp_par_keep+local max rel.err 6.67e-07
+# f32 warp_par_keep+local max rel.err 6.67e-07
+# f32 warp_par_keep+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par_keep+local,23.46,89.4,69.8,91.7,2,VALID
+# f32 warp_par4_keep+local max rel.err 6.67e-07
+# f32 warp_par4_keep+local max rel.err 6.67e-07
+# f32 warp_par4_keep+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par4_keep+local,23.65,88.7,69.3,90.9,2,VALID
+# f32 skip+local max rel.err 6.67e-07
+# f32 skip+local max rel.err 6.67e-07
+# f32 skip+local max rel.err 6.67e-07
+f32,1048576,262144,skip+local,23.14,90.6,70.8,92.9,2,VALID
+# f32 serial+packed+local max rel.err 6.67e-07
+# f32 serial+packed+local max rel.err 6.67e-07
+# f32 serial+packed+local max rel.err 6.67e-07
+f32,1048576,262144,serial+packed+local,22.40,93.6,73.1,96.0,2,VALID
+# f32 warp_read+packed+local max rel.err 6.95e-07
+# f32 warp_read+packed+local max rel.err 6.95e-07
+# f32 warp_read+packed+local max rel.err 6.95e-07
+f32,1048576,262144,warp_read+packed+local,22.75,92.2,72.0,94.5,2,VALID
+# f32 warp_par+packed+local max rel.err 6.67e-07
+# f32 warp_par+packed+local max rel.err 6.67e-07
+# f32 warp_par+packed+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par+packed+local,22.34,93.9,73.4,96.3,2,VALID
+# f32 warp_par4+packed+local max rel.err 6.67e-07
+# f32 warp_par4+packed+local max rel.err 6.67e-07
+# f32 warp_par4+packed+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par4+packed+local,22.53,93.1,72.7,95.5,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 6.67e-07
+# f32 warp_par_keep+packed+local max rel.err 6.67e-07
+# f32 warp_par_keep+packed+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par_keep+packed+local,22.37,93.8,73.2,96.1,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 6.67e-07
+# f32 warp_par4_keep+packed+local max rel.err 6.67e-07
+# f32 warp_par4_keep+packed+local max rel.err 6.67e-07
+f32,1048576,262144,warp_par4_keep+packed+local,22.53,93.1,72.7,95.5,2,VALID
+# f32 skip+packed+local max rel.err 6.95e-07
+# f32 skip+packed+local max rel.err 6.67e-07
+# f32 skip+packed+local max rel.err 6.67e-07
+f32,1048576,262144,skip+packed+local,22.24,94.3,73.7,96.7,2,VALID
+# u32: N=262144, 6144 elems/block, 43 blocks, 16 SMs
+u32,1048576,262144,memcpy,16.32,128.5,100.0,125.5,0,-
+u32,1048576,262144,cub,20.48,102.4,79.7,100.0,0,VALID
+u32,1048576,262144,serial,30.53,68.7,53.5,67.1,2,VALID
+u32,1048576,262144,warp_read,32.77,64.0,49.8,62.5,2,VALID
+u32,1048576,262144,warp_par,31.07,67.5,52.5,65.9,2,VALID
+u32,1048576,262144,skip,30.66,68.4,53.2,66.8,2,VALID
+u32,1048576,262144,serial+packed,29.70,70.6,55.0,69.0,2,VALID
+u32,1048576,262144,warp_read+packed,31.87,65.8,51.2,64.3,2,VALID
+u32,1048576,262144,warp_par+packed,30.82,68.1,53.0,66.5,2,VALID
+u32,1048576,262144,skip+packed,29.76,70.5,54.8,68.8,2,VALID
+u32,1048576,262144,serial+local,22.53,93.1,72.4,90.9,2,VALID
+u32,1048576,262144,warp_read+local,24.54,85.4,66.5,83.4,2,VALID
+u32,1048576,262144,warp_par+local,24.38,86.0,66.9,84.0,2,VALID
+u32,1048576,262144,warp_par4+local,24.54,85.4,66.5,83.4,2,VALID
+u32,1048576,262144,warp_par_keep+local,24.38,86.0,66.9,84.0,2,VALID
+u32,1048576,262144,warp_par4_keep+local,22.75,92.2,71.7,90.0,2,VALID
+u32,1048576,262144,skip+local,24.58,85.3,66.4,83.3,2,VALID
+u32,1048576,262144,serial+packed+local,23.52,89.2,69.4,87.1,2,VALID
+u32,1048576,262144,warp_read+packed+local,23.20,90.4,70.3,88.3,2,VALID
+u32,1048576,262144,warp_par+packed+local,22.53,93.1,72.4,90.9,2,VALID
+u32,1048576,262144,warp_par4+packed+local,24.29,86.3,67.2,84.3,2,VALID
+u32,1048576,262144,warp_par_keep+packed+local,22.46,93.4,72.6,91.2,2,VALID
+u32,1048576,262144,warp_par4_keep+packed+local,22.50,93.2,72.5,91.0,2,VALID
+u32,1048576,262144,skip+packed+local,22.78,92.0,71.6,89.9,2,VALID
+# u64: N=131072, 3072 elems/block, 43 blocks, 16 SMs
+u64,1048576,131072,memcpy,15.90,131.9,100.0,127.8,0,-
+u64,1048576,131072,cub,20.32,103.2,78.3,100.0,0,VALID
+u64,1048576,131072,serial,24.61,85.2,64.6,82.6,2,VALID
+u64,1048576,131072,warp_read,25.50,82.2,62.4,79.7,2,VALID
+u64,1048576,131072,warp_par,24.58,85.3,64.7,82.7,2,VALID
+u64,1048576,131072,skip,24.58,85.3,64.7,82.7,2,VALID
+u64,1048576,131072,serial+packed,26.27,79.8,60.5,77.3,2,VALID
+u64,1048576,131072,warp_read+packed,26.53,79.1,60.0,76.6,2,VALID
+u64,1048576,131072,warp_par+packed,24.58,85.3,64.7,82.7,2,VALID
+u64,1048576,131072,skip+packed,23.87,87.8,66.6,85.1,2,VALID
+u64,1048576,131072,serial+local,21.82,96.1,72.9,93.1,2,VALID
+u64,1048576,131072,warp_read+local,22.14,94.7,71.8,91.8,2,VALID
+u64,1048576,131072,warp_par+local,21.22,98.8,75.0,95.8,2,VALID
+u64,1048576,131072,warp_par4+local,21.89,95.8,72.7,92.8,2,VALID
+u64,1048576,131072,warp_par_keep+local,20.99,99.9,75.8,96.8,2,VALID
+u64,1048576,131072,warp_par4_keep+local,21.70,96.7,73.3,93.7,2,VALID
+u64,1048576,131072,skip+local,22.53,93.1,70.6,90.2,2,VALID
+u64,1048576,131072,serial+packed+local,21.02,99.8,75.6,96.7,2,VALID
+u64,1048576,131072,warp_read+packed+local,20.83,100.7,76.3,97.5,2,VALID
+u64,1048576,131072,warp_par+packed+local,21.66,96.8,73.4,93.8,2,VALID
+u64,1048576,131072,warp_par4+packed+local,22.08,95.0,72.0,92.0,2,VALID
+u64,1048576,131072,warp_par_keep+packed+local,21.66,96.8,73.4,93.8,2,VALID
+u64,1048576,131072,warp_par4_keep+packed+local,21.38,98.1,74.4,95.1,2,VALID
+u64,1048576,131072,skip+packed+local,20.48,102.4,77.7,99.2,2,VALID
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=4194304, 24576 elems/block, 171 blocks, 16 SMs
+u8,4194304,4194304,memcpy,52.83,158.8,100.0,159.8,0,-
+u8,4194304,4194304,cub,84.42,99.4,62.6,100.0,0,VALID
+u8,4194304,4194304,serial,215.30,39.0,24.5,39.2,1,VALID
+u8,4194304,4194304,warp_read,218.98,38.3,24.1,38.6,1,VALID
+u8,4194304,4194304,warp_par,220.83,38.0,23.9,38.2,1,VALID
+u8,4194304,4194304,skip,214.98,39.0,24.6,39.3,1,VALID
+u8,4194304,4194304,serial+packed,214.72,39.1,24.6,39.3,1,VALID
+u8,4194304,4194304,warp_read+packed,214.62,39.1,24.6,39.3,1,VALID
+u8,4194304,4194304,warp_par+packed,217.09,38.6,24.3,38.9,1,VALID
+u8,4194304,4194304,skip+packed,211.94,39.6,24.9,39.8,1,VALID
+u8,4194304,4194304,serial+local,64.77,129.5,81.6,130.3,2,VALID
+u8,4194304,4194304,warp_read+local,67.62,124.1,78.1,124.8,2,VALID
+u8,4194304,4194304,warp_par+local,68.22,123.0,77.4,123.7,2,VALID
+u8,4194304,4194304,warp_par4+local,68.80,121.9,76.8,122.7,2,VALID
+u8,4194304,4194304,warp_par_keep+local,66.85,125.5,79.0,126.3,2,VALID
+u8,4194304,4194304,warp_par4_keep+local,69.44,120.8,76.1,121.6,2,VALID
+u8,4194304,4194304,skip+local,65.54,128.0,80.6,128.8,2,VALID
+u8,4194304,4194304,serial+packed+local,65.50,128.1,80.7,128.9,2,VALID
+u8,4194304,4194304,warp_read+packed+local,64.70,129.6,81.7,130.5,2,VALID
+u8,4194304,4194304,warp_par+packed+local,64.93,129.2,81.4,130.0,2,VALID
+u8,4194304,4194304,warp_par4+packed+local,65.47,128.1,80.7,128.9,2,VALID
+u8,4194304,4194304,warp_par_keep+packed+local,64.61,129.8,81.8,130.7,2,VALID
+u8,4194304,4194304,warp_par4_keep+packed+local,65.54,128.0,80.6,128.8,2,VALID
+u8,4194304,4194304,skip+packed+local,65.54,128.0,80.6,128.8,2,VALID
+# u16: N=2097152, 12288 elems/block, 171 blocks, 16 SMs
+u16,4194304,2097152,memcpy,52.83,158.8,100.0,114.9,0,-
+u16,4194304,2097152,cub,60.70,138.2,87.0,100.0,0,VALID
+u16,4194304,2097152,serial,119.39,70.3,44.3,50.8,2,VALID
+u16,4194304,2097152,warp_read,120.83,69.4,43.7,50.2,2,VALID
+u16,4194304,2097152,warp_par,119.87,70.0,44.1,50.6,2,VALID
+u16,4194304,2097152,skip,117.82,71.2,44.8,51.5,2,VALID
+u16,4194304,2097152,serial+packed,117.76,71.2,44.9,51.5,2,VALID
+u16,4194304,2097152,warp_read+packed,119.01,70.5,44.4,51.0,2,VALID
+u16,4194304,2097152,warp_par+packed,117.38,71.5,45.0,51.7,2,VALID
+u16,4194304,2097152,skip+packed,116.74,71.9,45.3,52.0,2,VALID
+u16,4194304,2097152,serial+local,64.48,130.1,81.9,94.1,2,VALID
+u16,4194304,2097152,warp_read+local,65.50,128.1,80.7,92.7,2,VALID
+u16,4194304,2097152,warp_par+local,65.44,128.2,80.7,92.8,2,VALID
+u16,4194304,2097152,warp_par4+local,68.03,123.3,77.7,89.2,2,VALID
+u16,4194304,2097152,warp_par_keep+local,65.54,128.0,80.6,92.6,2,VALID
+u16,4194304,2097152,warp_par4_keep+local,69.47,120.7,76.0,87.4,2,VALID
+u16,4194304,2097152,skip+local,65.44,128.2,80.7,92.8,2,VALID
+u16,4194304,2097152,serial+packed+local,63.81,131.5,82.8,95.1,2,VALID
+u16,4194304,2097152,warp_read+packed+local,63.58,131.9,83.1,95.5,2,VALID
+u16,4194304,2097152,warp_par+packed+local,63.49,132.1,83.2,95.6,2,VALID
+u16,4194304,2097152,warp_par4+packed+local,63.55,132.0,83.1,95.5,2,VALID
+u16,4194304,2097152,warp_par_keep+packed+local,63.49,132.1,83.2,95.6,2,VALID
+u16,4194304,2097152,warp_par4_keep+packed+local,63.65,131.8,83.0,95.4,2,VALID
+u16,4194304,2097152,skip+packed+local,63.42,132.3,83.3,95.7,2,VALID
+# f32: N=1048576, 6144 elems/block, 171 blocks, 16 SMs
+# f32 cub max rel.err 6.96e-07
+f32,4194304,1048576,memcpy,52.80,158.9,100.0,108.5,0,-
+f32,4194304,1048576,cub,57.28,146.4,92.2,100.0,0,VALID
+# f32 serial max rel.err 2.46e-07
+# f32 serial max rel.err 3.12e-07
+# f32 serial max rel.err 2.38e-07
+f32,4194304,1048576,serial,73.98,113.4,71.4,77.4,2,VALID
+# f32 warp_read max rel.err 2.80e-07
+# f32 warp_read max rel.err 2.38e-07
+# f32 warp_read max rel.err 2.86e-07
+f32,4194304,1048576,warp_read,76.29,110.0,69.2,75.1,2,VALID
+# f32 warp_par max rel.err 2.80e-07
+# f32 warp_par max rel.err 2.27e-07
+# f32 warp_par max rel.err 2.82e-07
+f32,4194304,1048576,warp_par,75.62,110.9,69.8,75.8,2,VALID
+# f32 skip max rel.err 2.38e-07
+# f32 skip max rel.err 2.38e-07
+# f32 skip max rel.err 3.33e-07
+f32,4194304,1048576,skip,75.33,111.4,70.1,76.0,2,VALID
+# f32 serial+packed max rel.err 3.53e-07
+# f32 serial+packed max rel.err 2.71e-07
+# f32 serial+packed max rel.err 3.33e-07
+f32,4194304,1048576,serial+packed,72.45,115.8,72.9,79.1,2,VALID
+# f32 warp_read+packed max rel.err 2.85e-07
+# f32 warp_read+packed max rel.err 3.54e-07
+# f32 warp_read+packed max rel.err 2.38e-07
+f32,4194304,1048576,warp_read+packed,77.06,108.9,68.5,74.3,2,VALID
+# f32 warp_par+packed max rel.err 4.23e-07
+# f32 warp_par+packed max rel.err 2.61e-07
+# f32 warp_par+packed max rel.err 3.18e-07
+f32,4194304,1048576,warp_par+packed,76.67,109.4,68.9,74.7,2,VALID
+# f32 skip+packed max rel.err 2.82e-07
+# f32 skip+packed max rel.err 2.71e-07
+# f32 skip+packed max rel.err 2.40e-07
+f32,4194304,1048576,skip+packed,72.58,115.6,72.8,78.9,2,VALID
+# f32 serial+local max rel.err 7.23e-07
+# f32 serial+local max rel.err 6.40e-07
+# f32 serial+local max rel.err 7.07e-07
+f32,4194304,1048576,serial+local,60.86,137.8,86.8,94.1,2,VALID
+# f32 warp_read+local max rel.err 7.59e-07
+# f32 warp_read+local max rel.err 7.07e-07
+# f32 warp_read+local max rel.err 7.07e-07
+f32,4194304,1048576,warp_read+local,61.92,135.5,85.3,92.5,2,VALID
+# f32 warp_par+local max rel.err 7.07e-07
+# f32 warp_par+local max rel.err 8.10e-07
+# f32 warp_par+local max rel.err 8.10e-07
+f32,4194304,1048576,warp_par+local,61.44,136.5,85.9,93.2,2,VALID
+# f32 warp_par4+local max rel.err 7.49e-07
+# f32 warp_par4+local max rel.err 7.07e-07
+# f32 warp_par4+local max rel.err 7.07e-07
+f32,4194304,1048576,warp_par4+local,63.74,131.6,82.8,89.9,2,VALID
+# f32 warp_par_keep+local max rel.err 6.40e-07
+# f32 warp_par_keep+local max rel.err 8.04e-07
+# f32 warp_par_keep+local max rel.err 7.07e-07
+f32,4194304,1048576,warp_par_keep+local,61.44,136.5,85.9,93.2,2,VALID
+# f32 warp_par4_keep+local max rel.err 6.40e-07
+# f32 warp_par4_keep+local max rel.err 6.94e-07
+# f32 warp_par4_keep+local max rel.err 6.40e-07
+f32,4194304,1048576,warp_par4_keep+local,65.54,128.0,80.6,87.4,2,VALID
+# f32 skip+local max rel.err 7.07e-07
+# f32 skip+local max rel.err 7.07e-07
+# f32 skip+local max rel.err 6.40e-07
+f32,4194304,1048576,skip+local,61.47,136.5,85.9,93.2,2,VALID
+# f32 serial+packed+local max rel.err 7.01e-07
+# f32 serial+packed+local max rel.err 7.07e-07
+# f32 serial+packed+local max rel.err 6.40e-07
+f32,4194304,1048576,serial+packed+local,59.58,140.8,88.6,96.1,2,VALID
+# f32 warp_read+packed+local max rel.err 7.07e-07
+# f32 warp_read+packed+local max rel.err 6.63e-07
+# f32 warp_read+packed+local max rel.err 7.07e-07
+f32,4194304,1048576,warp_read+packed+local,59.10,141.9,89.3,96.9,2,VALID
+# f32 warp_par+packed+local max rel.err 7.07e-07
+# f32 warp_par+packed+local max rel.err 7.07e-07
+# f32 warp_par+packed+local max rel.err 6.40e-07
+f32,4194304,1048576,warp_par+packed+local,59.14,141.9,89.3,96.9,2,VALID
+# f32 warp_par4+packed+local max rel.err 8.04e-07
+# f32 warp_par4+packed+local max rel.err 7.07e-07
+# f32 warp_par4+packed+local max rel.err 7.07e-07
+f32,4194304,1048576,warp_par4+packed+local,59.94,140.0,88.1,95.6,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 7.07e-07
+# f32 warp_par_keep+packed+local max rel.err 6.79e-07
+# f32 warp_par_keep+packed+local max rel.err 6.40e-07
+f32,4194304,1048576,warp_par_keep+packed+local,59.30,141.5,89.0,96.6,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 7.07e-07
+# f32 warp_par4_keep+packed+local max rel.err 7.07e-07
+# f32 warp_par4_keep+packed+local max rel.err 7.07e-07
+f32,4194304,1048576,warp_par4_keep+packed+local,59.39,141.2,88.9,96.4,2,VALID
+# f32 skip+packed+local max rel.err 7.07e-07
+# f32 skip+packed+local max rel.err 7.07e-07
+# f32 skip+packed+local max rel.err 6.40e-07
+f32,4194304,1048576,skip+packed+local,59.30,141.5,89.0,96.6,2,VALID
+# u32: N=1048576, 6144 elems/block, 171 blocks, 16 SMs
+u32,4194304,1048576,memcpy,52.83,158.8,100.0,108.4,0,-
+u32,4194304,1048576,cub,57.25,146.5,92.3,100.0,0,VALID
+u32,4194304,1048576,serial,74.72,112.3,70.7,76.6,2,VALID
+u32,4194304,1048576,warp_read,76.80,109.2,68.8,74.5,2,VALID
+u32,4194304,1048576,warp_par,75.78,110.7,69.7,75.5,2,VALID
+u32,4194304,1048576,skip,75.52,111.1,70.0,75.8,2,VALID
+u32,4194304,1048576,serial+packed,73.89,113.5,71.5,77.5,2,VALID
+u32,4194304,1048576,warp_read+packed,75.94,110.5,69.6,75.4,2,VALID
+u32,4194304,1048576,warp_par+packed,74.53,112.6,70.9,76.8,2,VALID
+u32,4194304,1048576,skip+packed,71.68,117.0,73.7,79.9,2,VALID
+u32,4194304,1048576,serial+local,61.12,137.2,86.4,93.7,2,VALID
+u32,4194304,1048576,warp_read+local,61.47,136.5,85.9,93.1,2,VALID
+u32,4194304,1048576,warp_par+local,61.73,135.9,85.6,92.7,2,VALID
+u32,4194304,1048576,warp_par4+local,64.00,131.1,82.5,89.4,2,VALID
+u32,4194304,1048576,warp_par_keep+local,61.28,136.9,86.2,93.4,2,VALID
+u32,4194304,1048576,warp_par4_keep+local,65.54,128.0,80.6,87.4,2,VALID
+u32,4194304,1048576,skip+local,61.47,136.5,85.9,93.1,2,VALID
+u32,4194304,1048576,serial+packed+local,59.42,141.2,88.9,96.3,2,VALID
+u32,4194304,1048576,warp_read+packed+local,59.04,142.1,89.5,97.0,2,VALID
+u32,4194304,1048576,warp_par+packed+local,59.14,141.9,89.3,96.8,2,VALID
+u32,4194304,1048576,warp_par4+packed+local,59.23,141.6,89.2,96.7,2,VALID
+u32,4194304,1048576,warp_par_keep+packed+local,59.78,140.3,88.4,95.8,2,VALID
+u32,4194304,1048576,warp_par4_keep+packed+local,59.33,141.4,89.1,96.5,2,VALID
+u32,4194304,1048576,skip+packed+local,59.30,141.5,89.1,96.5,2,VALID
+# u64: N=524288, 3072 elems/block, 171 blocks, 16 SMs
+u64,4194304,524288,memcpy,52.67,159.3,100.0,108.9,0,-
+u64,4194304,524288,cub,57.34,146.3,91.9,100.0,0,VALID
+u64,4194304,524288,serial,64.90,129.3,81.2,88.4,2,VALID
+u64,4194304,524288,warp_read,64.74,129.6,81.4,88.6,2,VALID
+u64,4194304,524288,warp_par,66.59,126.0,79.1,86.1,2,VALID
+u64,4194304,524288,skip,65.54,128.0,80.4,87.5,2,VALID
+u64,4194304,524288,serial+packed,63.49,132.1,83.0,90.3,2,VALID
+u64,4194304,524288,warp_read+packed,63.46,132.2,83.0,90.4,2,VALID
+u64,4194304,524288,warp_par+packed,64.58,129.9,81.6,88.8,2,VALID
+u64,4194304,524288,skip+packed,61.12,137.2,86.2,93.8,2,VALID
+u64,4194304,524288,serial+local,59.30,141.5,88.8,96.7,2,VALID
+u64,4194304,524288,warp_read+local,60.06,139.7,87.7,95.5,2,VALID
+u64,4194304,524288,warp_par+local,59.49,141.0,88.5,96.4,2,VALID
+u64,4194304,524288,warp_par4+local,62.02,135.3,84.9,92.5,2,VALID
+u64,4194304,524288,warp_par_keep+local,59.97,139.9,87.8,95.6,2,VALID
+u64,4194304,524288,warp_par4_keep+local,63.20,132.7,83.3,90.7,2,VALID
+u64,4194304,524288,skip+local,61.34,136.7,85.9,93.5,2,VALID
+u64,4194304,524288,serial+packed+local,57.57,145.7,91.5,99.6,2,VALID
+u64,4194304,524288,warp_read+packed+local,59.87,140.1,88.0,95.8,2,VALID
+u64,4194304,524288,warp_par+packed+local,58.72,142.9,89.7,97.7,2,VALID
+u64,4194304,524288,warp_par4+packed+local,58.94,142.3,89.4,97.3,2,VALID
+u64,4194304,524288,warp_par_keep+packed+local,59.52,140.9,88.5,96.3,2,VALID
+u64,4194304,524288,warp_par4_keep+packed+local,59.14,141.9,89.1,97.0,2,VALID
+u64,4194304,524288,skip+packed+local,57.57,145.7,91.5,99.6,2,VALID
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=16777216, 24576 elems/block, 683 blocks, 16 SMs
+u8,16777216,16777216,memcpy,198.82,168.8,100.0,158.6,0,-
+u8,16777216,16777216,cub,315.39,106.4,63.0,100.0,0,VALID
+u8,16777216,16777216,serial,830.34,40.4,23.9,38.0,1,VALID
+u8,16777216,16777216,warp_read,826.30,40.6,24.1,38.2,1,VALID
+u8,16777216,16777216,warp_par,827.07,40.6,24.0,38.1,1,VALID
+u8,16777216,16777216,skip,806.82,41.6,24.6,39.1,1,VALID
+u8,16777216,16777216,serial+packed,810.27,41.4,24.5,38.9,1,VALID
+u8,16777216,16777216,warp_read+packed,815.94,41.1,24.4,38.7,1,VALID
+u8,16777216,16777216,warp_par+packed,820.99,40.9,24.2,38.4,1,VALID
+u8,16777216,16777216,skip+packed,810.11,41.4,24.5,38.9,1,VALID
+u8,16777216,16777216,serial+local,213.18,157.4,93.3,147.9,2,VALID
+u8,16777216,16777216,warp_read+local,224.42,149.5,88.6,140.5,2,VALID
+u8,16777216,16777216,warp_par+local,224.80,149.3,88.4,140.3,2,VALID
+u8,16777216,16777216,warp_par4+local,231.52,144.9,85.9,136.2,2,VALID
+u8,16777216,16777216,warp_par_keep+local,224.13,149.7,88.7,140.7,2,VALID
+u8,16777216,16777216,warp_par4_keep+local,249.15,134.7,79.8,126.6,2,VALID
+u8,16777216,16777216,skip+local,218.78,153.4,90.9,144.2,2,VALID
+u8,16777216,16777216,serial+packed+local,217.06,154.6,91.6,145.3,2,VALID
+u8,16777216,16777216,warp_read+packed+local,213.22,157.4,93.2,147.9,2,VALID
+u8,16777216,16777216,warp_par+packed+local,212.99,157.5,93.3,148.1,2,VALID
+u8,16777216,16777216,warp_par4+packed+local,214.72,156.3,92.6,146.9,2,VALID
+u8,16777216,16777216,warp_par_keep+packed+local,212.90,157.6,93.4,148.1,2,VALID
+u8,16777216,16777216,warp_par4_keep+packed+local,214.62,156.3,92.6,147.0,2,VALID
+u8,16777216,16777216,skip+packed+local,216.51,155.0,91.8,145.7,2,VALID
+# u16: N=8388608, 12288 elems/block, 683 blocks, 16 SMs
+u16,16777216,8388608,memcpy,198.78,168.8,100.0,106.1,0,-
+u16,16777216,8388608,cub,210.88,159.1,94.3,100.0,0,VALID
+u16,16777216,8388608,serial,426.91,78.6,46.6,49.4,2,VALID
+u16,16777216,8388608,warp_read,430.66,77.9,46.2,49.0,2,VALID
+u16,16777216,8388608,warp_par,421.41,79.6,47.2,50.0,2,VALID
+u16,16777216,8388608,skip,429.44,78.1,46.3,49.1,2,VALID
+u16,16777216,8388608,serial+packed,413.70,81.1,48.1,51.0,2,VALID
+u16,16777216,8388608,warp_read+packed,417.79,80.3,47.6,50.5,2,VALID
+u16,16777216,8388608,warp_par+packed,415.74,80.7,47.8,50.7,2,VALID
+u16,16777216,8388608,skip+packed,414.24,81.0,48.0,50.9,2,VALID
+u16,16777216,8388608,serial+local,212.99,157.5,93.3,99.0,2,VALID
+u16,16777216,8388608,warp_read+local,224.13,149.7,88.7,94.1,2,VALID
+u16,16777216,8388608,warp_par+local,219.39,152.9,90.6,96.1,2,VALID
+u16,16777216,8388608,warp_par4+local,232.19,144.5,85.6,90.8,2,VALID
+u16,16777216,8388608,warp_par_keep+local,219.17,153.1,90.7,96.2,2,VALID
+u16,16777216,8388608,warp_par4_keep+local,254.05,132.1,78.2,83.0,2,VALID
+u16,16777216,8388608,skip+local,218.72,153.4,90.9,96.4,2,VALID
+u16,16777216,8388608,serial+packed+local,215.42,155.8,92.3,97.9,2,VALID
+u16,16777216,8388608,warp_read+packed+local,212.61,157.8,93.5,99.2,2,VALID
+u16,16777216,8388608,warp_par+packed+local,212.80,157.7,93.4,99.1,2,VALID
+u16,16777216,8388608,warp_par4+packed+local,212.54,157.9,93.5,99.2,2,VALID
+u16,16777216,8388608,warp_par_keep+packed+local,213.66,157.0,93.0,98.7,2,VALID
+u16,16777216,8388608,warp_par4_keep+packed+local,211.84,158.4,93.8,99.5,2,VALID
+u16,16777216,8388608,skip+packed+local,214.91,156.1,92.5,98.1,2,VALID
+# f32: N=4194304, 6144 elems/block, 683 blocks, 16 SMs
+# f32 cub max rel.err 9.07e-07
+f32,16777216,4194304,memcpy,198.88,168.7,100.0,102.9,0,-
+f32,16777216,4194304,cub,204.70,163.9,97.2,100.0,0,VALID
+# f32 serial max rel.err 5.20e-07
+# f32 serial max rel.err 6.00e-07
+# f32 serial max rel.err 5.95e-07
+f32,16777216,4194304,serial,254.56,131.8,78.1,80.4,2,VALID
+# f32 warp_read max rel.err 3.55e-07
+# f32 warp_read max rel.err 4.89e-07
+# f32 warp_read max rel.err 5.13e-07
+f32,16777216,4194304,warp_read,256.93,130.6,77.4,79.7,2,VALID
+# f32 warp_par max rel.err 4.07e-07
+# f32 warp_par max rel.err 4.89e-07
+# f32 warp_par max rel.err 5.11e-07
+f32,16777216,4194304,warp_par,251.42,133.5,79.1,81.4,2,VALID
+# f32 skip max rel.err 4.19e-07
+# f32 skip max rel.err 6.14e-07
+# f32 skip max rel.err 3.84e-07
+f32,16777216,4194304,skip,260.61,128.8,76.3,78.5,2,VALID
+# f32 serial+packed max rel.err 5.45e-07
+# f32 serial+packed max rel.err 4.91e-07
+# f32 serial+packed max rel.err 7.42e-07
+f32,16777216,4194304,serial+packed,246.78,136.0,80.6,82.9,2,VALID
+# f32 warp_read+packed max rel.err 3.77e-07
+# f32 warp_read+packed max rel.err 7.29e-07
+# f32 warp_read+packed max rel.err 5.38e-07
+f32,16777216,4194304,warp_read+packed,255.23,131.5,77.9,80.2,2,VALID
+# f32 warp_par+packed max rel.err 5.13e-07
+# f32 warp_par+packed max rel.err 5.87e-07
+# f32 warp_par+packed max rel.err 3.71e-07
+f32,16777216,4194304,warp_par+packed,250.05,134.2,79.5,81.9,2,VALID
+# f32 skip+packed max rel.err 5.49e-07
+# f32 skip+packed max rel.err 5.15e-07
+# f32 skip+packed max rel.err 5.93e-07
+f32,16777216,4194304,skip+packed,243.71,137.7,81.6,84.0,2,VALID
+# f32 serial+local max rel.err 7.94e-07
+# f32 serial+local max rel.err 8.51e-07
+# f32 serial+local max rel.err 9.47e-07
+f32,16777216,4194304,serial+local,210.78,159.2,94.4,97.1,2,VALID
+# f32 warp_read+local max rel.err 7.23e-07
+# f32 warp_read+local max rel.err 8.47e-07
+# f32 warp_read+local max rel.err 8.47e-07
+f32,16777216,4194304,warp_read+local,217.09,154.6,91.6,94.3,2,VALID
+# f32 warp_par+local max rel.err 9.19e-07
+# f32 warp_par+local max rel.err 1.02e-06
+# f32 warp_par+local max rel.err 7.93e-07
+f32,16777216,4194304,warp_par+local,221.95,151.2,89.6,92.2,2,VALID
+# f32 warp_par4+local max rel.err 7.14e-07
+# f32 warp_par4+local max rel.err 1.09e-06
+# f32 warp_par4+local max rel.err 7.72e-07
+f32,16777216,4194304,warp_par4+local,223.36,150.2,89.0,91.6,2,VALID
+# f32 warp_par_keep+local max rel.err 7.89e-07
+# f32 warp_par_keep+local max rel.err 7.93e-07
+# f32 warp_par_keep+local max rel.err 8.47e-07
+f32,16777216,4194304,warp_par_keep+local,217.12,154.5,91.6,94.3,2,VALID
+# f32 warp_par4_keep+local max rel.err 7.93e-07
+# f32 warp_par4_keep+local max rel.err 8.24e-07
+# f32 warp_par4_keep+local max rel.err 1.09e-06
+f32,16777216,4194304,warp_par4_keep+local,239.33,140.2,83.1,85.5,2,VALID
+# f32 skip+local max rel.err 9.64e-07
+# f32 skip+local max rel.err 8.42e-07
+# f32 skip+local max rel.err 7.93e-07
+f32,16777216,4194304,skip+local,217.54,154.2,91.4,94.1,2,VALID
+# f32 serial+packed+local max rel.err 8.25e-07
+# f32 serial+packed+local max rel.err 8.07e-07
+# f32 serial+packed+local max rel.err 9.42e-07
+f32,16777216,4194304,serial+packed+local,210.85,159.1,94.3,97.1,2,VALID
+# f32 warp_read+packed+local max rel.err 7.93e-07
+# f32 warp_read+packed+local max rel.err 1.02e-06
+# f32 warp_read+packed+local max rel.err 8.43e-07
+f32,16777216,4194304,warp_read+packed+local,208.10,161.2,95.6,98.4,2,VALID
+# f32 warp_par+packed+local max rel.err 1.08e-06
+# f32 warp_par+packed+local max rel.err 7.36e-07
+# f32 warp_par+packed+local max rel.err 8.60e-07
+f32,16777216,4194304,warp_par+packed+local,206.88,162.2,96.1,98.9,2,VALID
+# f32 warp_par4+packed+local max rel.err 7.15e-07
+# f32 warp_par4+packed+local max rel.err 9.18e-07
+# f32 warp_par4+packed+local max rel.err 8.07e-07
+f32,16777216,4194304,warp_par4+packed+local,208.77,160.7,95.3,98.1,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 7.93e-07
+# f32 warp_par_keep+packed+local max rel.err 9.31e-07
+# f32 warp_par_keep+packed+local max rel.err 8.34e-07
+f32,16777216,4194304,warp_par_keep+packed+local,210.21,159.6,94.6,97.4,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 8.16e-07
+# f32 warp_par4_keep+packed+local max rel.err 1.09e-06
+# f32 warp_par4_keep+packed+local max rel.err 7.45e-07
+f32,16777216,4194304,warp_par4_keep+packed+local,208.86,160.7,95.2,98.0,2,VALID
+# f32 skip+packed+local max rel.err 8.47e-07
+# f32 skip+packed+local max rel.err 7.93e-07
+# f32 skip+packed+local max rel.err 8.47e-07
+f32,16777216,4194304,skip+packed+local,211.33,158.8,94.1,96.9,2,VALID
+# u32: N=4194304, 6144 elems/block, 683 blocks, 16 SMs
+u32,16777216,4194304,memcpy,198.82,168.8,100.0,102.9,0,-
+u32,16777216,4194304,cub,204.61,164.0,97.2,100.0,0,VALID
+u32,16777216,4194304,serial,257.38,130.4,77.2,79.5,2,VALID
+u32,16777216,4194304,warp_read,258.98,129.6,76.8,79.0,2,VALID
+u32,16777216,4194304,warp_par,253.34,132.4,78.5,80.8,2,VALID
+u32,16777216,4194304,skip,265.86,126.2,74.8,77.0,2,VALID
+u32,16777216,4194304,serial+packed,248.00,135.3,80.2,82.5,2,VALID
+u32,16777216,4194304,warp_read+packed,262.02,128.1,75.9,78.1,2,VALID
+u32,16777216,4194304,warp_par+packed,257.73,130.2,77.1,79.4,2,VALID
+u32,16777216,4194304,skip+packed,247.87,135.4,80.2,82.5,2,VALID
+u32,16777216,4194304,serial+local,214.66,156.3,92.6,95.3,2,VALID
+u32,16777216,4194304,warp_read+local,220.22,152.4,90.3,92.9,2,VALID
+u32,16777216,4194304,warp_par+local,219.52,152.9,90.6,93.2,2,VALID
+u32,16777216,4194304,warp_par4+local,224.19,149.7,88.7,91.3,2,VALID
+u32,16777216,4194304,warp_par_keep+local,216.26,155.2,91.9,94.6,2,VALID
+u32,16777216,4194304,warp_par4_keep+local,244.80,137.1,81.2,83.6,2,VALID
+u32,16777216,4194304,skip+local,217.54,154.2,91.4,94.1,2,VALID
+u32,16777216,4194304,serial+packed+local,211.84,158.4,93.9,96.6,2,VALID
+u32,16777216,4194304,warp_read+packed+local,211.87,158.4,93.8,96.6,2,VALID
+u32,16777216,4194304,warp_par+packed+local,207.97,161.3,95.6,98.4,2,VALID
+u32,16777216,4194304,warp_par4+packed+local,208.03,161.3,95.6,98.4,2,VALID
+u32,16777216,4194304,warp_par_keep+packed+local,207.68,161.6,95.7,98.5,2,VALID
+u32,16777216,4194304,warp_par4_keep+packed+local,207.20,161.9,96.0,98.7,2,VALID
+u32,16777216,4194304,skip+packed+local,210.94,159.1,94.3,97.0,2,VALID
+# u64: N=2097152, 3072 elems/block, 683 blocks, 16 SMs
+u64,16777216,2097152,memcpy,198.72,168.9,100.0,103.1,0,-
+u64,16777216,2097152,cub,204.80,163.8,97.0,100.0,0,VALID
+u64,16777216,2097152,serial,215.04,156.0,92.4,95.2,2,VALID
+u64,16777216,2097152,warp_read,217.09,154.6,91.5,94.3,2,VALID
+u64,16777216,2097152,warp_par,220.90,151.9,90.0,92.7,2,VALID
+u64,16777216,2097152,skip,221.18,151.7,89.8,92.6,2,VALID
+u64,16777216,2097152,serial+packed,210.88,159.1,94.2,97.1,2,VALID
+u64,16777216,2097152,warp_read+packed,210.94,159.1,94.2,97.1,2,VALID
+u64,16777216,2097152,warp_par+packed,213.31,157.3,93.2,96.0,2,VALID
+u64,16777216,2097152,skip+packed,215.04,156.0,92.4,95.2,2,VALID
+u64,16777216,2097152,serial+local,209.09,160.5,95.0,97.9,2,VALID
+u64,16777216,2097152,warp_read+local,216.32,155.1,91.9,94.7,2,VALID
+u64,16777216,2097152,warp_par+local,212.99,157.5,93.3,96.2,2,VALID
+u64,16777216,2097152,warp_par4+local,217.63,154.2,91.3,94.1,2,VALID
+u64,16777216,2097152,warp_par_keep+local,215.01,156.1,92.4,95.3,2,VALID
+u64,16777216,2097152,warp_par4_keep+local,233.47,143.7,85.1,87.7,2,VALID
+u64,16777216,2097152,skip+local,214.72,156.3,92.5,95.4,2,VALID
+u64,16777216,2097152,serial+packed+local,207.17,162.0,95.9,98.9,2,VALID
+u64,16777216,2097152,warp_read+packed+local,207.07,162.0,96.0,98.9,2,VALID
+u64,16777216,2097152,warp_par+packed+local,206.85,162.2,96.1,99.0,2,VALID
+u64,16777216,2097152,warp_par4+packed+local,208.42,161.0,95.3,98.3,2,VALID
+u64,16777216,2097152,warp_par_keep+packed+local,206.46,162.5,96.2,99.2,2,VALID
+u64,16777216,2097152,warp_par4_keep+packed+local,212.35,158.0,93.6,96.4,2,VALID
+u64,16777216,2097152,skip+packed+local,207.58,161.6,95.7,98.7,2,VALID
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=67108864, 24576 elems/block, 2731 blocks, 16 SMs
+u8,67108864,67108864,memcpy,786.43,170.7,100.0,169.0,0,-
+u8,67108864,67108864,cub,1329.22,101.0,59.2,100.0,0,VALID
+u8,67108864,67108864,serial,3221.18,41.7,24.4,41.3,1,VALID
+u8,67108864,67108864,warp_read,3235.81,41.5,24.3,41.1,1,VALID
+u8,67108864,67108864,warp_par,3256.80,41.2,24.1,40.8,1,VALID
+u8,67108864,67108864,skip,3213.31,41.8,24.5,41.4,1,VALID
+u8,67108864,67108864,serial+packed,3181.38,42.2,24.7,41.8,1,VALID
+u8,67108864,67108864,warp_read+packed,3206.56,41.9,24.5,41.5,1,VALID
+u8,67108864,67108864,warp_par+packed,3213.31,41.8,24.5,41.4,1,VALID
+u8,67108864,67108864,skip+packed,3174.40,42.3,24.8,41.9,1,VALID
+u8,67108864,67108864,serial+local,814.66,164.8,96.5,163.2,2,VALID
+u8,67108864,67108864,warp_read+local,866.40,154.9,90.8,153.4,2,VALID
+u8,67108864,67108864,warp_par+local,864.99,155.2,90.9,153.7,2,VALID
+u8,67108864,67108864,warp_par4+local,903.17,148.6,87.1,147.2,2,VALID
+u8,67108864,67108864,warp_par_keep+local,869.18,154.4,90.5,152.9,2,VALID
+u8,67108864,67108864,warp_par4_keep+local,995.04,134.9,79.0,133.6,2,VALID
+u8,67108864,67108864,skip+local,842.78,159.3,93.3,157.7,2,VALID
+u8,67108864,67108864,serial+packed+local,827.23,162.2,95.1,160.7,2,VALID
+u8,67108864,67108864,warp_read+packed+local,805.57,166.6,97.6,165.0,2,VALID
+u8,67108864,67108864,warp_par+packed+local,807.23,166.3,97.4,164.7,2,VALID
+u8,67108864,67108864,warp_par4+packed+local,808.64,166.0,97.3,164.4,2,VALID
+u8,67108864,67108864,warp_par_keep+packed+local,802.82,167.2,98.0,165.6,2,VALID
+u8,67108864,67108864,warp_par4_keep+packed+local,802.82,167.2,98.0,165.6,2,VALID
+u8,67108864,67108864,skip+packed+local,821.09,163.5,95.8,161.9,2,VALID
+# u16: N=33554432, 12288 elems/block, 2731 blocks, 16 SMs
+u16,67108864,33554432,memcpy,783.65,171.3,100.0,105.3,0,-
+u16,67108864,33554432,cub,825.09,162.7,95.0,100.0,0,VALID
+u16,67108864,33554432,serial,1703.94,78.8,46.0,48.4,2,VALID
+u16,67108864,33554432,warp_read,1728.51,77.6,45.3,47.7,2,VALID
+u16,67108864,33554432,warp_par,1671.68,80.3,46.9,49.4,2,VALID
+u16,67108864,33554432,skip,1728.51,77.6,45.3,47.7,2,VALID
+u16,67108864,33554432,serial+packed,1649.06,81.4,47.5,50.0,2,VALID
+u16,67108864,33554432,warp_read+packed,1696.99,79.1,46.2,48.6,2,VALID
+u16,67108864,33554432,warp_par+packed,1642.56,81.7,47.7,50.2,2,VALID
+u16,67108864,33554432,skip+packed,1650.66,81.3,47.5,50.0,2,VALID
+u16,67108864,33554432,serial+local,824.96,162.7,95.0,100.0,2,VALID
+u16,67108864,33554432,warp_read+local,868.61,154.5,90.2,95.0,2,VALID
+u16,67108864,33554432,warp_par+local,847.87,158.3,92.4,97.3,2,VALID
+u16,67108864,33554432,warp_par4+local,889.28,150.9,88.1,92.8,2,VALID
+u16,67108864,33554432,warp_par_keep+local,833.70,161.0,94.0,99.0,2,VALID
+u16,67108864,33554432,warp_par4_keep+local,974.75,137.7,80.4,84.6,2,VALID
+u16,67108864,33554432,skip+local,846.94,158.5,92.5,97.4,2,VALID
+u16,67108864,33554432,serial+packed+local,814.02,164.9,96.3,101.4,2,VALID
+u16,67108864,33554432,warp_read+packed+local,802.82,167.2,97.6,102.8,2,VALID
+u16,67108864,33554432,warp_par+packed+local,800.67,167.6,97.9,103.0,2,VALID
+u16,67108864,33554432,warp_par4+packed+local,801.82,167.4,97.7,102.9,2,VALID
+u16,67108864,33554432,warp_par_keep+packed+local,801.22,167.5,97.8,103.0,2,VALID
+u16,67108864,33554432,warp_par4_keep+packed+local,798.72,168.0,98.1,103.3,2,VALID
+u16,67108864,33554432,skip+packed+local,817.12,164.3,95.9,101.0,2,VALID
+# f32: N=16777216, 6144 elems/block, 2731 blocks, 16 SMs
+# f32 cub max rel.err 1.32e-06
+f32,67108864,16777216,memcpy,783.81,171.2,100.0,101.1,0,-
+f32,67108864,16777216,cub,792.42,169.4,98.9,100.0,0,VALID
+# f32 serial max rel.err 9.76e-07
+# f32 serial max rel.err 7.45e-07
+# f32 serial max rel.err 1.44e-06
+f32,67108864,16777216,serial,993.66,135.1,78.9,79.7,2,VALID
+# f32 warp_read max rel.err 7.80e-07
+# f32 warp_read max rel.err 1.04e-06
+# f32 warp_read max rel.err 1.01e-06
+f32,67108864,16777216,warp_read,992.67,135.2,79.0,79.8,2,VALID
+# f32 warp_par max rel.err 1.01e-06
+# f32 warp_par max rel.err 1.34e-06
+# f32 warp_par max rel.err 7.87e-07
+f32,67108864,16777216,warp_par,976.90,137.4,80.2,81.1,2,VALID
+# f32 skip max rel.err 9.68e-07
+# f32 skip max rel.err 1.06e-06
+# f32 skip max rel.err 1.20e-06
+f32,67108864,16777216,skip,1030.53,130.2,76.1,76.9,2,VALID
+# f32 serial+packed max rel.err 2.02e-06
+# f32 serial+packed max rel.err 1.47e-06
+# f32 serial+packed max rel.err 1.73e-06
+f32,67108864,16777216,serial+packed,964.61,139.1,81.3,82.1,2,VALID
+# f32 warp_read+packed max rel.err 7.86e-07
+# f32 warp_read+packed max rel.err 1.55e-06
+# f32 warp_read+packed max rel.err 7.97e-07
+f32,67108864,16777216,warp_read+packed,1002.94,133.8,78.2,79.0,2,VALID
+# f32 warp_par+packed max rel.err 9.18e-07
+# f32 warp_par+packed max rel.err 1.10e-06
+# f32 warp_par+packed max rel.err 9.94e-07
+f32,67108864,16777216,warp_par+packed,985.09,136.2,79.6,80.4,2,VALID
+# f32 skip+packed max rel.err 2.02e-06
+# f32 skip+packed max rel.err 1.12e-06
+# f32 skip+packed max rel.err 1.77e-06
+f32,67108864,16777216,skip+packed,969.06,138.5,80.9,81.8,2,VALID
+# f32 serial+local max rel.err 1.46e-06
+# f32 serial+local max rel.err 1.32e-06
+# f32 serial+local max rel.err 1.23e-06
+f32,67108864,16777216,serial+local,815.10,164.7,96.2,97.2,2,VALID
+# f32 warp_read+local max rel.err 1.09e-06
+# f32 warp_read+local max rel.err 1.14e-06
+# f32 warp_read+local max rel.err 8.53e-07
+f32,67108864,16777216,warp_read+local,850.30,157.8,92.2,93.2,2,VALID
+# f32 warp_par+local max rel.err 1.12e-06
+# f32 warp_par+local max rel.err 1.12e-06
+# f32 warp_par+local max rel.err 1.28e-06
+f32,67108864,16777216,warp_par+local,843.78,159.1,92.9,93.9,2,VALID
+# f32 warp_par4+local max rel.err 1.18e-06
+# f32 warp_par4+local max rel.err 9.48e-07
+# f32 warp_par4+local max rel.err 1.23e-06
+f32,67108864,16777216,warp_par4+local,863.55,155.4,90.8,91.8,2,VALID
+# f32 warp_par_keep+local max rel.err 9.48e-07
+# f32 warp_par_keep+local max rel.err 1.04e-06
+# f32 warp_par_keep+local max rel.err 1.06e-06
+f32,67108864,16777216,warp_par_keep+local,831.62,161.4,94.3,95.3,2,VALID
+# f32 warp_par4_keep+local max rel.err 9.61e-07
+# f32 warp_par4_keep+local max rel.err 1.12e-06
+# f32 warp_par4_keep+local max rel.err 1.23e-06
+f32,67108864,16777216,warp_par4_keep+local,924.86,145.1,84.7,85.7,2,VALID
+# f32 skip+local max rel.err 1.25e-06
+# f32 skip+local max rel.err 1.57e-06
+# f32 skip+local max rel.err 1.34e-06
+f32,67108864,16777216,skip+local,859.58,156.1,91.2,92.2,2,VALID
+# f32 serial+packed+local max rel.err 1.36e-06
+# f32 serial+packed+local max rel.err 1.04e-06
+# f32 serial+packed+local max rel.err 1.57e-06
+f32,67108864,16777216,serial+packed+local,813.47,165.0,96.4,97.4,2,VALID
+# f32 warp_read+packed+local max rel.err 1.23e-06
+# f32 warp_read+packed+local max rel.err 1.03e-06
+# f32 warp_read+packed+local max rel.err 1.34e-06
+f32,67108864,16777216,warp_read+packed+local,798.72,168.0,98.1,99.2,2,VALID
+# f32 warp_par+packed+local max rel.err 1.90e-06
+# f32 warp_par+packed+local max rel.err 1.34e-06
+# f32 warp_par+packed+local max rel.err 1.90e-06
+f32,67108864,16777216,warp_par+packed+local,804.86,166.8,97.4,98.5,2,VALID
+# f32 warp_par4+packed+local max rel.err 1.25e-06
+# f32 warp_par4+packed+local max rel.err 1.23e-06
+# f32 warp_par4+packed+local max rel.err 1.38e-06
+f32,67108864,16777216,warp_par4+packed+local,804.93,166.7,97.4,98.4,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 1.17e-06
+# f32 warp_par_keep+packed+local max rel.err 1.12e-06
+# f32 warp_par_keep+packed+local max rel.err 1.14e-06
+f32,67108864,16777216,warp_par_keep+packed+local,798.94,168.0,98.1,99.2,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 1.12e-06
+# f32 warp_par4_keep+packed+local max rel.err 9.68e-07
+# f32 warp_par4_keep+packed+local max rel.err 1.34e-06
+f32,67108864,16777216,warp_par4_keep+packed+local,816.99,164.3,95.9,97.0,2,VALID
+# f32 skip+packed+local max rel.err 1.02e-06
+# f32 skip+packed+local max rel.err 1.28e-06
+# f32 skip+packed+local max rel.err 1.39e-06
+f32,67108864,16777216,skip+packed+local,813.47,165.0,96.4,97.4,2,VALID
+# u32: N=16777216, 6144 elems/block, 2731 blocks, 16 SMs
+u32,67108864,16777216,memcpy,784.99,171.0,100.0,101.7,0,-
+u32,67108864,16777216,cub,798.53,168.1,98.3,100.0,0,VALID
+u32,67108864,16777216,serial,1042.72,128.7,75.3,76.6,2,VALID
+u32,67108864,16777216,warp_read,1020.00,131.6,77.0,78.3,2,VALID
+u32,67108864,16777216,warp_par,1019.90,131.6,77.0,78.3,2,VALID
+u32,67108864,16777216,skip,1067.71,125.7,73.5,74.8,2,VALID
+u32,67108864,16777216,serial+packed,1001.25,134.1,78.4,79.8,2,VALID
+u32,67108864,16777216,warp_read+packed,1042.14,128.8,75.3,76.6,2,VALID
+u32,67108864,16777216,warp_par+packed,1013.73,132.4,77.4,78.8,2,VALID
+u32,67108864,16777216,skip+packed,1015.52,132.2,77.3,78.6,2,VALID
+u32,67108864,16777216,serial+local,819.74,163.7,95.8,97.4,2,VALID
+u32,67108864,16777216,warp_read+local,847.58,158.4,92.6,94.2,2,VALID
+u32,67108864,16777216,warp_par+local,854.56,157.1,91.9,93.4,2,VALID
+u32,67108864,16777216,warp_par4+local,871.30,154.0,90.1,91.6,2,VALID
+u32,67108864,16777216,warp_par_keep+local,844.00,159.0,93.0,94.6,2,VALID
+u32,67108864,16777216,warp_par4_keep+local,973.28,137.9,80.7,82.0,2,VALID
+u32,67108864,16777216,skip+local,844.03,159.0,93.0,94.6,2,VALID
+u32,67108864,16777216,serial+packed+local,814.62,164.8,96.4,98.0,2,VALID
+u32,67108864,16777216,warp_read+packed+local,800.00,167.8,98.1,99.8,2,VALID
+u32,67108864,16777216,warp_par+packed+local,797.09,168.4,98.5,100.2,2,VALID
+u32,67108864,16777216,warp_par4+packed+local,802.62,167.2,97.8,99.5,2,VALID
+u32,67108864,16777216,warp_par_keep+packed+local,795.42,168.7,98.7,100.4,2,VALID
+u32,67108864,16777216,warp_par4_keep+packed+local,796.13,168.6,98.6,100.3,2,VALID
+u32,67108864,16777216,skip+packed+local,810.94,165.5,96.8,98.5,2,VALID
+# u64: N=8388608, 3072 elems/block, 2731 blocks, 16 SMs
+u64,67108864,8388608,memcpy,790.72,169.7,100.0,100.3,0,-
+u64,67108864,8388608,cub,792.96,169.3,99.7,100.0,0,VALID
+u64,67108864,8388608,serial,837.44,160.3,94.4,94.7,2,VALID
+u64,67108864,8388608,warp_read,847.87,158.3,93.3,93.5,2,VALID
+u64,67108864,8388608,warp_par,851.97,157.5,92.8,93.1,2,VALID
+u64,67108864,8388608,skip,860.83,155.9,91.9,92.1,2,VALID
+u64,67108864,8388608,serial+packed,796.67,168.5,99.3,99.5,2,VALID
+u64,67108864,8388608,warp_read+packed,809.47,165.8,97.7,98.0,2,VALID
+u64,67108864,8388608,warp_par+packed,811.97,165.3,97.4,97.7,2,VALID
+u64,67108864,8388608,skip+packed,808.93,165.9,97.7,98.0,2,VALID
+u64,67108864,8388608,serial+local,814.72,164.7,97.1,97.3,2,VALID
+u64,67108864,8388608,warp_read+local,846.85,158.5,93.4,93.6,2,VALID
+u64,67108864,8388608,warp_par+local,831.01,161.5,95.2,95.4,2,VALID
+u64,67108864,8388608,warp_par4+local,857.76,156.5,92.2,92.4,2,VALID
+u64,67108864,8388608,warp_par_keep+local,837.89,160.2,94.4,94.6,2,VALID
+u64,67108864,8388608,warp_par4_keep+local,935.90,143.4,84.5,84.7,2,VALID
+u64,67108864,8388608,skip+local,840.32,159.7,94.1,94.4,2,VALID
+u64,67108864,8388608,serial+packed+local,795.07,168.8,99.5,99.7,2,VALID
+u64,67108864,8388608,warp_read+packed+local,797.82,168.2,99.1,99.4,2,VALID
+u64,67108864,8388608,warp_par+packed+local,798.56,168.1,99.0,99.3,2,VALID
+u64,67108864,8388608,warp_par4+packed+local,800.48,167.7,98.8,99.1,2,VALID
+u64,67108864,8388608,warp_par_keep+packed+local,813.15,165.1,97.2,97.5,2,VALID
+u64,67108864,8388608,warp_par4_keep+packed+local,829.57,161.8,95.3,95.6,2,VALID
+u64,67108864,8388608,skip+packed+local,802.75,167.2,98.5,98.8,2,VALID
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=268435456, 24576 elems/block, 10923 blocks, 16 SMs
+u8,268435456,268435456,memcpy,3080.19,174.3,100.0,173.7,0,-
+u8,268435456,268435456,cub,5350.75,100.3,57.6,100.0,0,VALID
+u8,268435456,268435456,serial,12825.60,41.9,24.0,41.7,1,VALID
+u8,268435456,268435456,warp_read,12973.34,41.4,23.7,41.2,1,VALID
+u8,268435456,268435456,warp_par,13071.30,41.1,23.6,40.9,1,VALID
+u8,268435456,268435456,skip,12939.84,41.5,23.8,41.4,1,VALID
+u8,268435456,268435456,serial+packed,12828.93,41.8,24.0,41.7,1,VALID
+u8,268435456,268435456,warp_read+packed,12896.00,41.6,23.9,41.5,1,VALID
+u8,268435456,268435456,warp_par+packed,12935.17,41.5,23.8,41.4,1,VALID
+u8,268435456,268435456,skip+packed,12853.70,41.8,24.0,41.6,1,VALID
+u8,268435456,268435456,serial+local,3220.29,166.7,95.6,166.2,2,VALID
+u8,268435456,268435456,warp_read+local,3450.88,155.6,89.3,155.1,2,VALID
+u8,268435456,268435456,warp_par+local,3427.81,156.6,89.9,156.1,2,VALID
+u8,268435456,268435456,warp_par4+local,3540.48,151.6,87.0,151.1,2,VALID
+u8,268435456,268435456,warp_par_keep+local,3389.47,158.4,90.9,157.9,2,VALID
+u8,268435456,268435456,warp_par4_keep+local,3921.38,136.9,78.5,136.5,2,VALID
+u8,268435456,268435456,skip+local,3389.44,158.4,90.9,157.9,2,VALID
+u8,268435456,268435456,serial+packed+local,3259.17,164.7,94.5,164.2,2,VALID
+u8,268435456,268435456,warp_read+packed+local,3188.35,168.4,96.6,167.8,2,VALID
+u8,268435456,268435456,warp_par+packed+local,3176.38,169.0,97.0,168.5,2,VALID
+u8,268435456,268435456,warp_par4+packed+local,3176.45,169.0,97.0,168.5,2,VALID
+u8,268435456,268435456,warp_par_keep+packed+local,3163.94,169.7,97.4,169.1,2,VALID
+u8,268435456,268435456,warp_par4_keep+packed+local,3159.90,169.9,97.5,169.3,2,VALID
+u8,268435456,268435456,skip+packed+local,3234.34,166.0,95.2,165.4,2,VALID
+# u16: N=134217728, 12288 elems/block, 10923 blocks, 16 SMs
+u16,268435456,134217728,memcpy,3080.13,174.3,100.0,106.7,0,-
+u16,268435456,134217728,cub,3287.30,163.3,93.7,100.0,0,VALID
+u16,268435456,134217728,serial,6893.70,77.9,44.7,47.7,2,VALID
+u16,268435456,134217728,warp_read,7033.31,76.3,43.8,46.7,2,VALID
+u16,268435456,134217728,warp_par,6670.34,80.5,46.2,49.3,2,VALID
+u16,268435456,134217728,skip,6938.59,77.4,44.4,47.4,2,VALID
+u16,268435456,134217728,serial+packed,6547.46,82.0,47.0,50.2,2,VALID
+u16,268435456,134217728,warp_read+packed,6850.37,78.4,45.0,48.0,2,VALID
+u16,268435456,134217728,warp_par+packed,6623.58,81.1,46.5,49.6,2,VALID
+u16,268435456,134217728,skip+packed,6641.63,80.8,46.4,49.5,2,VALID
+u16,268435456,134217728,serial+local,3211.26,167.2,95.9,102.4,2,VALID
+u16,268435456,134217728,warp_read+local,3440.64,156.0,89.5,95.5,2,VALID
+u16,268435456,134217728,warp_par+local,3335.17,161.0,92.4,98.6,2,VALID
+u16,268435456,134217728,warp_par4+local,3528.70,152.1,87.3,93.2,2,VALID
+u16,268435456,134217728,warp_par_keep+local,3330.37,161.2,92.5,98.7,2,VALID
+u16,268435456,134217728,warp_par4_keep+local,3885.28,138.2,79.3,84.6,2,VALID
+u16,268435456,134217728,skip+local,3359.90,159.8,91.7,97.8,2,VALID
+u16,268435456,134217728,serial+packed+local,3196.54,168.0,96.4,102.8,2,VALID
+u16,268435456,134217728,warp_read+packed+local,3174.50,169.1,97.0,103.6,2,VALID
+u16,268435456,134217728,warp_par+packed+local,3163.65,169.7,97.4,103.9,2,VALID
+u16,268435456,134217728,warp_par4+packed+local,3162.56,169.8,97.4,103.9,2,VALID
+u16,268435456,134217728,warp_par_keep+packed+local,3165.82,169.6,97.3,103.8,2,VALID
+u16,268435456,134217728,warp_par4_keep+packed+local,3160.06,169.9,97.5,104.0,2,VALID
+u16,268435456,134217728,skip+packed+local,3219.65,166.7,95.7,102.1,2,VALID
+# f32: N=67108864, 6144 elems/block, 10923 blocks, 16 SMs
+# f32 cub max rel.err 1.74e-06
+f32,268435456,67108864,memcpy,3137.63,171.1,100.0,100.8,0,-
+f32,268435456,67108864,cub,3162.18,169.8,99.2,100.0,0,VALID
+# f32 serial max rel.err 1.42e-06
+# f32 serial max rel.err 1.84e-06
+# f32 serial max rel.err 9.47e-07
+f32,268435456,67108864,serial,4017.22,133.6,78.1,78.7,2,VALID
+# f32 warp_read max rel.err 1.99e-06
+# f32 warp_read max rel.err 1.64e-06
+# f32 warp_read max rel.err 1.08e-06
+f32,268435456,67108864,warp_read,4000.77,134.2,78.4,79.0,2,VALID
+# f32 warp_par max rel.err 1.96e-06
+# f32 warp_par max rel.err 1.31e-06
+# f32 warp_par max rel.err 1.46e-06
+f32,268435456,67108864,warp_par,3954.69,135.8,79.3,80.0,2,VALID
+# f32 skip max rel.err 2.34e-06
+# f32 skip max rel.err 2.04e-06
+# f32 skip max rel.err 1.09e-06
+f32,268435456,67108864,skip,4133.79,129.9,75.9,76.5,2,VALID
+# f32 serial+packed max rel.err 9.47e-07
+# f32 serial+packed max rel.err 2.62e-06
+# f32 serial+packed max rel.err 2.11e-06
+f32,268435456,67108864,serial+packed,3897.25,137.8,80.5,81.1,2,VALID
+# f32 warp_read+packed max rel.err 1.63e-06
+# f32 warp_read+packed max rel.err 1.50e-06
+# f32 warp_read+packed max rel.err 1.71e-06
+f32,268435456,67108864,warp_read+packed,4027.17,133.3,77.9,78.5,2,VALID
+# f32 warp_par+packed max rel.err 1.92e-06
+# f32 warp_par+packed max rel.err 1.52e-06
+# f32 warp_par+packed max rel.err 1.21e-06
+f32,268435456,67108864,warp_par+packed,3956.74,135.7,79.3,79.9,2,VALID
+# f32 skip+packed max rel.err 2.10e-06
+# f32 skip+packed max rel.err 2.54e-06
+# f32 skip+packed max rel.err 2.25e-06
+f32,268435456,67108864,skip+packed,3921.92,136.9,80.0,80.6,2,VALID
+# f32 serial+local max rel.err 2.53e-06
+# f32 serial+local max rel.err 2.05e-06
+# f32 serial+local max rel.err 1.79e-06
+f32,268435456,67108864,serial+local,3231.26,166.1,97.1,97.9,2,VALID
+# f32 warp_read+local max rel.err 2.10e-06
+# f32 warp_read+local max rel.err 1.29e-06
+# f32 warp_read+local max rel.err 1.41e-06
+f32,268435456,67108864,warp_read+local,3350.02,160.3,93.7,94.4,2,VALID
+# f32 warp_par+local max rel.err 2.50e-06
+# f32 warp_par+local max rel.err 2.17e-06
+# f32 warp_par+local max rel.err 1.69e-06
+f32,268435456,67108864,warp_par+local,3331.74,161.1,94.2,94.9,2,VALID
+# f32 warp_par4+local max rel.err 1.75e-06
+# f32 warp_par4+local max rel.err 2.48e-06
+# f32 warp_par4+local max rel.err 1.40e-06
+f32,268435456,67108864,warp_par4+local,3420.16,157.0,91.7,92.5,2,VALID
+# f32 warp_par_keep+local max rel.err 1.98e-06
+# f32 warp_par_keep+local max rel.err 1.91e-06
+# f32 warp_par_keep+local max rel.err 1.42e-06
+f32,268435456,67108864,warp_par_keep+local,3297.28,162.8,95.2,95.9,2,VALID
+# f32 warp_par4_keep+local max rel.err 2.88e-06
+# f32 warp_par4_keep+local max rel.err 1.62e-06
+# f32 warp_par4_keep+local max rel.err 2.08e-06
+f32,268435456,67108864,warp_par4_keep+local,3627.01,148.0,86.5,87.2,2,VALID
+# f32 skip+local max rel.err 1.70e-06
+# f32 skip+local max rel.err 2.48e-06
+# f32 skip+local max rel.err 1.71e-06
+f32,268435456,67108864,skip+local,3325.31,161.4,94.4,95.1,2,VALID
+# f32 serial+packed+local max rel.err 2.04e-06
+# f32 serial+packed+local max rel.err 1.86e-06
+# f32 serial+packed+local max rel.err 1.76e-06
+f32,268435456,67108864,serial+packed+local,3200.99,167.7,98.0,98.8,2,VALID
+# f32 warp_read+packed+local max rel.err 2.12e-06
+# f32 warp_read+packed+local max rel.err 1.78e-06
+# f32 warp_read+packed+local max rel.err 3.35e-06
+f32,268435456,67108864,warp_read+packed+local,3169.98,169.4,99.0,99.8,2,VALID
+# f32 warp_par+packed+local max rel.err 2.12e-06
+# f32 warp_par+packed+local max rel.err 3.25e-06
+# f32 warp_par+packed+local max rel.err 2.22e-06
+f32,268435456,67108864,warp_par+packed+local,3147.78,170.6,99.7,100.5,2,VALID
+# f32 warp_par4+packed+local max rel.err 2.03e-06
+# f32 warp_par4+packed+local max rel.err 2.35e-06
+# f32 warp_par4+packed+local max rel.err 1.89e-06
+f32,268435456,67108864,warp_par4+packed+local,3151.94,170.3,99.5,100.3,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 1.68e-06
+# f32 warp_par_keep+packed+local max rel.err 2.45e-06
+# f32 warp_par_keep+packed+local max rel.err 1.63e-06
+f32,268435456,67108864,warp_par_keep+packed+local,3143.49,170.8,99.8,100.6,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 1.89e-06
+# f32 warp_par4_keep+packed+local max rel.err 2.20e-06
+# f32 warp_par4_keep+packed+local max rel.err 2.43e-06
+f32,268435456,67108864,warp_par4_keep+packed+local,3145.73,170.7,99.7,100.5,2,VALID
+# f32 skip+packed+local max rel.err 1.66e-06
+# f32 skip+packed+local max rel.err 1.73e-06
+# f32 skip+packed+local max rel.err 1.76e-06
+f32,268435456,67108864,skip+packed+local,3209.89,167.3,97.7,98.5,2,VALID
+# u32: N=67108864, 6144 elems/block, 10923 blocks, 16 SMs
+u32,268435456,67108864,memcpy,3144.90,170.7,100.0,99.7,0,-
+u32,268435456,67108864,cub,3135.39,171.2,100.3,100.0,0,VALID
+u32,268435456,67108864,serial,4231.14,126.9,74.3,74.1,2,VALID
+u32,268435456,67108864,warp_read,4155.01,129.2,75.7,75.5,2,VALID
+u32,268435456,67108864,warp_par,4122.30,130.2,76.3,76.1,2,VALID
+u32,268435456,67108864,skip,4320.06,124.3,72.8,72.6,2,VALID
+u32,268435456,67108864,serial+packed,4078.85,131.6,77.1,76.9,2,VALID
+u32,268435456,67108864,warp_read+packed,4195.30,128.0,75.0,74.7,2,VALID
+u32,268435456,67108864,warp_par+packed,4102.14,130.9,76.7,76.4,2,VALID
+u32,268435456,67108864,skip+packed,4101.98,130.9,76.7,76.4,2,VALID
+u32,268435456,67108864,serial+local,3229.70,166.2,97.4,97.1,2,VALID
+u32,268435456,67108864,warp_read+local,3321.73,161.6,94.7,94.4,2,VALID
+u32,268435456,67108864,warp_par+local,3365.50,159.5,93.4,93.2,2,VALID
+u32,268435456,67108864,warp_par4+local,3436.54,156.2,91.5,91.2,2,VALID
+u32,268435456,67108864,warp_par_keep+local,3319.94,161.7,94.7,94.4,2,VALID
+u32,268435456,67108864,warp_par4_keep+local,3752.64,143.1,83.8,83.6,2,VALID
+u32,268435456,67108864,skip+local,3385.34,158.6,92.9,92.6,2,VALID
+u32,268435456,67108864,serial+packed+local,3213.31,167.1,97.9,97.6,2,VALID
+u32,268435456,67108864,warp_read+packed+local,3158.30,170.0,99.6,99.3,2,VALID
+u32,268435456,67108864,warp_par+packed+local,3154.14,170.2,99.7,99.4,2,VALID
+u32,268435456,67108864,warp_par4+packed+local,3176.48,169.0,99.0,98.7,2,VALID
+u32,268435456,67108864,warp_par_keep+packed+local,3147.58,170.6,99.9,99.6,2,VALID
+u32,268435456,67108864,warp_par4_keep+packed+local,3137.95,171.1,100.2,99.9,2,VALID
+u32,268435456,67108864,skip+packed+local,3207.81,167.4,98.0,97.7,2,VALID
+# u64: N=33554432, 3072 elems/block, 10923 blocks, 16 SMs
+u64,268435456,33554432,memcpy,3129.09,171.6,100.0,100.1,0,-
+u64,268435456,33554432,cub,3131.68,171.4,99.9,100.0,0,VALID
+u64,268435456,33554432,serial,3307.52,162.3,94.6,94.7,2,VALID
+u64,268435456,33554432,warp_read,3290.21,163.2,95.1,95.2,2,VALID
+u64,268435456,33554432,warp_par,3350.46,160.2,93.4,93.5,2,VALID
+u64,268435456,33554432,skip,3444.70,155.9,90.8,90.9,2,VALID
+u64,268435456,33554432,serial+packed,3135.74,171.2,99.8,99.9,2,VALID
+u64,268435456,33554432,warp_read+packed,3212.38,167.1,97.4,97.5,2,VALID
+u64,268435456,33554432,warp_par+packed,3195.49,168.0,97.9,98.0,2,VALID
+u64,268435456,33554432,skip+packed,3162.27,169.8,99.0,99.0,2,VALID
+u64,268435456,33554432,serial+local,3217.38,166.9,97.3,97.3,2,VALID
+u64,268435456,33554432,warp_read+local,3369.50,159.3,92.9,92.9,2,VALID
+u64,268435456,33554432,warp_par+local,3317.44,161.8,94.3,94.4,2,VALID
+u64,268435456,33554432,warp_par4+local,3383.17,158.7,92.5,92.6,2,VALID
+u64,268435456,33554432,warp_par_keep+local,3315.62,161.9,94.4,94.5,2,VALID
+u64,268435456,33554432,warp_par4_keep+local,3729.98,143.9,83.9,84.0,2,VALID
+u64,268435456,33554432,skip+local,3326.56,161.4,94.1,94.1,2,VALID
+u64,268435456,33554432,serial+packed+local,3157.82,170.0,99.1,99.2,2,VALID
+u64,268435456,33554432,warp_read+packed+local,3167.52,169.5,98.8,98.9,2,VALID
+u64,268435456,33554432,warp_par+packed+local,3155.97,170.1,99.1,99.2,2,VALID
+u64,268435456,33554432,warp_par4+packed+local,3170.91,169.3,98.7,98.8,2,VALID
+u64,268435456,33554432,warp_par_keep+packed+local,3162.18,169.8,99.0,99.0,2,VALID
+u64,268435456,33554432,warp_par4_keep+packed+local,3320.61,161.7,94.2,94.3,2,VALID
+u64,268435456,33554432,skip+packed+local,3194.98,168.0,97.9,98.0,2,VALID
+Device name: NVIDIA GeForce GTX 1650 Ti
+Number of hardware threads: 16384
+Max block size: 1024
+Shared memory size: 49152
+====
+type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check
+# u8: N=536870912, 24576 elems/block, 21846 blocks, 16 SMs
+u8,536870912,536870912,memcpy,6241.82,172.0,100.0,175.1,0,-
+u8,536870912,536870912,cub,10929.38,98.2,57.1,100.0,0,VALID
+u8,536870912,536870912,serial,26022.40,41.3,24.0,42.0,1,VALID
+u8,536870912,536870912,warp_read,26322.46,40.8,23.7,41.5,1,VALID
+u8,536870912,536870912,warp_par,26417.47,40.6,23.6,41.4,1,VALID
+u8,536870912,536870912,skip,26131.46,41.1,23.9,41.8,1,VALID
+u8,536870912,536870912,serial+packed,25839.62,41.6,24.2,42.3,1,VALID
+u8,536870912,536870912,warp_read+packed,26032.13,41.2,24.0,42.0,1,VALID
+u8,536870912,536870912,warp_par+packed,26068.03,41.2,23.9,41.9,1,VALID
+u8,536870912,536870912,skip+packed,25848.10,41.5,24.1,42.3,1,VALID
+u8,536870912,536870912,serial+local,6444.51,166.6,96.9,169.6,2,VALID
+u8,536870912,536870912,warp_read+local,6871.26,156.3,90.8,159.1,2,VALID
+u8,536870912,536870912,warp_par+local,6853.95,156.7,91.1,159.5,2,VALID
+u8,536870912,536870912,warp_par4+local,7075.84,151.7,88.2,154.5,2,VALID
+u8,536870912,536870912,warp_par_keep+local,6787.36,158.2,92.0,161.0,2,VALID
+u8,536870912,536870912,warp_par4_keep+local,7851.58,136.8,79.5,139.2,2,VALID
+u8,536870912,536870912,skip+local,6844.64,156.9,91.2,159.7,2,VALID
+u8,536870912,536870912,serial+packed+local,6461.44,166.2,96.6,169.1,2,VALID
+u8,536870912,536870912,warp_read+packed+local,6350.14,169.1,98.3,172.1,2,VALID
+u8,536870912,536870912,warp_par+packed+local,6330.37,169.6,98.6,172.6,2,VALID
+u8,536870912,536870912,warp_par4+packed+local,6350.75,169.1,98.3,172.1,2,VALID
+u8,536870912,536870912,warp_par_keep+packed+local,6301.38,170.4,99.1,173.4,2,VALID
+u8,536870912,536870912,warp_par4_keep+packed+local,6311.52,170.1,98.9,173.2,2,VALID
+u8,536870912,536870912,skip+packed+local,6449.15,166.5,96.8,169.5,2,VALID
+# u16: N=268435456, 12288 elems/block, 21846 blocks, 16 SMs
+u16,536870912,268435456,memcpy,6219.78,172.6,100.0,106.0,0,-
+u16,536870912,268435456,cub,6590.91,162.9,94.4,100.0,0,VALID
+u16,536870912,268435456,serial,14016.16,76.6,44.4,47.0,2,VALID
+u16,536870912,268435456,warp_read,14329.47,74.9,43.4,46.0,2,VALID
+u16,536870912,268435456,warp_par,13566.08,79.1,45.8,48.6,2,VALID
+u16,536870912,268435456,skip,14078.94,76.3,44.2,46.8,2,VALID
+u16,536870912,268435456,serial+packed,13453.60,79.8,46.2,49.0,2,VALID
+u16,536870912,268435456,warp_read+packed,14043.62,76.5,44.3,46.9,2,VALID
+u16,536870912,268435456,warp_par+packed,13533.18,79.3,46.0,48.7,2,VALID
+u16,536870912,268435456,skip+packed,13557.79,79.2,45.9,48.6,2,VALID
+u16,536870912,268435456,serial+local,6374.88,168.4,97.6,103.4,2,VALID
+u16,536870912,268435456,warp_read+local,6875.14,156.2,90.5,95.9,2,VALID
+u16,536870912,268435456,warp_par+local,6649.86,161.5,93.5,99.1,2,VALID
+u16,536870912,268435456,warp_par4+local,7026.69,152.8,88.5,93.8,2,VALID
+u16,536870912,268435456,warp_par_keep+local,6590.11,162.9,94.4,100.0,2,VALID
+u16,536870912,268435456,warp_par4_keep+local,7772.16,138.2,80.0,84.8,2,VALID
+u16,536870912,268435456,skip+local,6791.07,158.1,91.6,97.1,2,VALID
+u16,536870912,268435456,serial+packed+local,6386.75,168.1,97.4,103.2,2,VALID
+u16,536870912,268435456,warp_read+packed+local,6322.53,169.8,98.4,104.2,2,VALID
+u16,536870912,268435456,warp_par+packed+local,6283.81,170.9,99.0,104.9,2,VALID
+u16,536870912,268435456,warp_par4+packed+local,6289.38,170.7,98.9,104.8,2,VALID
+u16,536870912,268435456,warp_par_keep+packed+local,6269.02,171.3,99.2,105.1,2,VALID
+u16,536870912,268435456,warp_par4_keep+packed+local,6270.91,171.2,99.2,105.1,2,VALID
+u16,536870912,268435456,skip+packed+local,6420.16,167.2,96.9,102.7,2,VALID
+# f32: N=134217728, 6144 elems/block, 21846 blocks, 16 SMs
+# f32 cub max rel.err 1.90e-06
+f32,536870912,134217728,memcpy,6244.32,172.0,100.0,100.3,0,-
+f32,536870912,134217728,cub,6263.23,171.4,99.7,100.0,0,VALID
+# f32 serial max rel.err 2.49e-06
+# f32 serial max rel.err 1.63e-06
+# f32 serial max rel.err 2.51e-06
+f32,536870912,134217728,serial,8166.27,131.5,76.5,76.7,2,VALID
+# f32 warp_read max rel.err 2.28e-06
+# f32 warp_read max rel.err 1.66e-06
+# f32 warp_read max rel.err 2.07e-06
+f32,536870912,134217728,warp_read,8062.62,133.2,77.4,77.7,2,VALID
+# f32 warp_par max rel.err 2.64e-06
+# f32 warp_par max rel.err 1.41e-06
+# f32 warp_par max rel.err 2.05e-06
+f32,536870912,134217728,warp_par,8007.68,134.1,78.0,78.2,2,VALID
+# f32 skip max rel.err 2.46e-06
+# f32 skip max rel.err 2.02e-06
+# f32 skip max rel.err 2.07e-06
+f32,536870912,134217728,skip,8383.78,128.1,74.5,74.7,2,VALID
+# f32 serial+packed max rel.err 1.93e-06
+# f32 serial+packed max rel.err 2.65e-06
+# f32 serial+packed max rel.err 2.84e-06
+f32,536870912,134217728,serial+packed,7880.70,136.2,79.2,79.5,2,VALID
+# f32 warp_read+packed max rel.err 3.31e-06
+# f32 warp_read+packed max rel.err 1.15e-06
+# f32 warp_read+packed max rel.err 4.05e-06
+f32,536870912,134217728,warp_read+packed,8104.06,132.5,77.1,77.3,2,VALID
+# f32 warp_par+packed max rel.err 2.54e-06
+# f32 warp_par+packed max rel.err 1.71e-06
+# f32 warp_par+packed max rel.err 3.29e-06
+f32,536870912,134217728,warp_par+packed,7933.09,135.3,78.7,79.0,2,VALID
+# f32 skip+packed max rel.err 1.85e-06
+# f32 skip+packed max rel.err 2.24e-06
+# f32 skip+packed max rel.err 3.36e-06
+f32,536870912,134217728,skip+packed,7941.44,135.2,78.6,78.9,2,VALID
+# f32 serial+local max rel.err 2.22e-06
+# f32 serial+local max rel.err 2.59e-06
+# f32 serial+local max rel.err 1.48e-06
+f32,536870912,134217728,serial+local,6420.86,167.2,97.3,97.5,2,VALID
+# f32 warp_read+local max rel.err 1.55e-06
+# f32 warp_read+local max rel.err 1.31e-06
+# f32 warp_read+local max rel.err 2.08e-06
+f32,536870912,134217728,warp_read+local,6723.42,159.7,92.9,93.2,2,VALID
+# f32 warp_par+local max rel.err 2.60e-06
+# f32 warp_par+local max rel.err 2.55e-06
+# f32 warp_par+local max rel.err 2.52e-06
+f32,536870912,134217728,warp_par+local,6665.25,161.1,93.7,94.0,2,VALID
+# f32 warp_par4+local max rel.err 1.95e-06
+# f32 warp_par4+local max rel.err 2.01e-06
+# f32 warp_par4+local max rel.err 1.69e-06
+f32,536870912,134217728,warp_par4+local,6829.22,157.2,91.4,91.7,2,VALID
+# f32 warp_par_keep+local max rel.err 1.58e-06
+# f32 warp_par_keep+local max rel.err 2.73e-06
+# f32 warp_par_keep+local max rel.err 2.39e-06
+f32,536870912,134217728,warp_par_keep+local,6594.56,162.8,94.7,95.0,2,VALID
+# f32 warp_par4_keep+local max rel.err 2.74e-06
+# f32 warp_par4_keep+local max rel.err 2.22e-06
+# f32 warp_par4_keep+local max rel.err 2.04e-06
+f32,536870912,134217728,warp_par4_keep+local,7288.64,147.3,85.7,85.9,2,VALID
+# f32 skip+local max rel.err 1.92e-06
+# f32 skip+local max rel.err 1.62e-06
+# f32 skip+local max rel.err 2.66e-06
+f32,536870912,134217728,skip+local,6680.58,160.7,93.5,93.8,2,VALID
+# f32 serial+packed+local max rel.err 2.40e-06
+# f32 serial+packed+local max rel.err 2.85e-06
+# f32 serial+packed+local max rel.err 3.12e-06
+f32,536870912,134217728,serial+packed+local,6412.29,167.5,97.4,97.7,2,VALID
+# f32 warp_read+packed+local max rel.err 2.82e-06
+# f32 warp_read+packed+local max rel.err 2.56e-06
+# f32 warp_read+packed+local max rel.err 2.18e-06
+f32,536870912,134217728,warp_read+packed+local,6301.70,170.4,99.1,99.4,2,VALID
+# f32 warp_par+packed+local max rel.err 2.94e-06
+# f32 warp_par+packed+local max rel.err 2.53e-06
+# f32 warp_par+packed+local max rel.err 2.00e-06
+f32,536870912,134217728,warp_par+packed+local,6275.81,171.1,99.5,99.8,2,VALID
+# f32 warp_par4+packed+local max rel.err 1.69e-06
+# f32 warp_par4+packed+local max rel.err 3.47e-06
+# f32 warp_par4+packed+local max rel.err 2.51e-06
+f32,536870912,134217728,warp_par4+packed+local,6309.89,170.2,99.0,99.3,2,VALID
+# f32 warp_par_keep+packed+local max rel.err 1.95e-06
+# f32 warp_par_keep+packed+local max rel.err 2.39e-06
+# f32 warp_par_keep+packed+local max rel.err 2.12e-06
+f32,536870912,134217728,warp_par_keep+packed+local,6273.18,171.2,99.5,99.8,2,VALID
+# f32 warp_par4_keep+packed+local max rel.err 1.53e-06
+# f32 warp_par4_keep+packed+local max rel.err 2.00e-06
+# f32 warp_par4_keep+packed+local max rel.err 2.22e-06
+f32,536870912,134217728,warp_par4_keep+packed+local,6265.82,171.4,99.7,100.0,2,VALID
+# f32 skip+packed+local max rel.err 2.35e-06
+# f32 skip+packed+local max rel.err 3.19e-06
+# f32 skip+packed+local max rel.err 2.97e-06
+f32,536870912,134217728,skip+packed+local,6413.28,167.4,97.4,97.7,2,VALID
+# u32: N=134217728, 6144 elems/block, 21846 blocks, 16 SMs
+u32,536870912,134217728,memcpy,6222.78,172.6,100.0,100.4,0,-
+u32,536870912,134217728,cub,6246.40,171.9,99.6,100.0,0,VALID
+u32,536870912,134217728,serial,8552.45,125.5,72.8,73.0,2,VALID
+u32,536870912,134217728,warp_read,8421.25,127.5,73.9,74.2,2,VALID
+u32,536870912,134217728,warp_par,8389.73,128.0,74.2,74.5,2,VALID
+u32,536870912,134217728,skip,8836.93,121.5,70.4,70.7,2,VALID
+u32,536870912,134217728,serial+packed,8337.41,128.8,74.6,74.9,2,VALID
+u32,536870912,134217728,warp_read+packed,8517.31,126.1,73.1,73.3,2,VALID
+u32,536870912,134217728,warp_par+packed,8329.22,128.9,74.7,75.0,2,VALID
+u32,536870912,134217728,skip+packed,8380.45,128.1,74.3,74.5,2,VALID
+u32,536870912,134217728,serial+local,6477.98,165.8,96.1,96.4,2,VALID
+u32,536870912,134217728,warp_read+local,6676.19,160.8,93.2,93.6,2,VALID
+u32,536870912,134217728,warp_par+local,6760.35,158.8,92.0,92.4,2,VALID
+u32,536870912,134217728,warp_par4+local,6891.42,155.8,90.3,90.6,2,VALID
+u32,536870912,134217728,warp_par_keep+local,6670.30,161.0,93.3,93.6,2,VALID
+u32,536870912,134217728,warp_par4_keep+local,7561.98,142.0,82.3,82.6,2,VALID
+u32,536870912,134217728,skip+local,6831.62,157.2,91.1,91.4,2,VALID
+u32,536870912,134217728,serial+packed+local,6389.76,168.0,97.4,97.8,2,VALID
+u32,536870912,134217728,warp_read+packed+local,6340.48,169.3,98.1,98.5,2,VALID
+u32,536870912,134217728,warp_par+packed+local,6309.73,170.2,98.6,99.0,2,VALID
+u32,536870912,134217728,warp_par4+packed+local,6328.32,169.7,98.3,98.7,2,VALID
+u32,536870912,134217728,warp_par_keep+packed+local,6291.58,170.7,98.9,99.3,2,VALID
+u32,536870912,134217728,warp_par4_keep+packed+local,6272.51,171.2,99.2,99.6,2,VALID
+u32,536870912,134217728,skip+packed+local,6409.98,167.5,97.1,97.4,2,VALID
+# u64: N=67108864, 3072 elems/block, 21846 blocks, 16 SMs
+u64,536870912,67108864,memcpy,6227.97,172.4,100.0,100.3,0,-
+u64,536870912,67108864,cub,6244.13,172.0,99.7,100.0,0,VALID
+u64,536870912,67108864,serial,6662.43,161.2,93.5,93.7,2,VALID
+u64,536870912,67108864,warp_read,6547.49,164.0,95.1,95.4,2,VALID
+u64,536870912,67108864,warp_par,6668.54,161.0,93.4,93.6,2,VALID
+u64,536870912,67108864,skip,6940.86,154.7,89.7,90.0,2,VALID
+u64,536870912,67108864,serial+packed,6278.66,171.0,99.2,99.5,2,VALID
+u64,536870912,67108864,warp_read+packed,6369.34,168.6,97.8,98.0,2,VALID
+u64,536870912,67108864,warp_par+packed,6368.90,168.6,97.8,98.0,2,VALID
+u64,536870912,67108864,skip+packed,6363.04,168.7,97.9,98.1,2,VALID
+u64,536870912,67108864,serial+local,6424.58,167.1,96.9,97.2,2,VALID
+u64,536870912,67108864,warp_read+local,6741.25,159.3,92.4,92.6,2,VALID
+u64,536870912,67108864,warp_par+local,6598.46,162.7,94.4,94.6,2,VALID
+u64,536870912,67108864,warp_par4+local,6774.78,158.5,91.9,92.2,2,VALID
+u64,536870912,67108864,warp_par_keep+local,6637.89,161.8,93.8,94.1,2,VALID
+u64,536870912,67108864,warp_par4_keep+local,7461.28,143.9,83.5,83.7,2,VALID
+u64,536870912,67108864,skip+local,6674.98,160.9,93.3,93.5,2,VALID
+u64,536870912,67108864,serial+packed+local,6244.58,171.9,99.7,100.0,2,VALID
+u64,536870912,67108864,warp_read+packed+local,6289.41,170.7,99.0,99.3,2,VALID
+u64,536870912,67108864,warp_par+packed+local,6296.13,170.5,98.9,99.2,2,VALID
+u64,536870912,67108864,warp_par4+packed+local,6306.43,170.3,98.8,99.0,2,VALID
+u64,536870912,67108864,warp_par_keep+packed+local,6274.53,171.1,99.3,99.5,2,VALID
+u64,536870912,67108864,warp_par4_keep+packed+local,6664.19,161.1,93.5,93.7,2,VALID
+u64,536870912,67108864,skip+packed+local,6364.42,168.7,97.9,98.1,2,VALID

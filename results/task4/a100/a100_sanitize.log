@@ -1,0 +1,2 @@
+for t in racecheck synccheck memcheck; do for s in 98305 1000003; do \
+  compute-sanitizer --tool $t --error-exitcode 1 ./bench_lookback $s 256 1 1 > /dev/null || exit 1; done; done

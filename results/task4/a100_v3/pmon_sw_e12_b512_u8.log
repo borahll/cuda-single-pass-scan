@@ -1,0 +1,17 @@
+# gpu         pid   type     sm    mem    enc    dec    jpg    ofa    command 
+# Idx           #    C/G      %      %      %      %      %      %    name 
+    0     296264     C     20      6      -      -      -      -    python         
+    0     296265     C     27      8      -      -      -      -    python         
+    0     296264     C      8      1      -      -      -      -    python         
+    0     296265     C      6      1      -      -      -      -    python         
+    0     296264     C      5      0      -      -      -      -    python         
+    0     296265     C      9      1      -      -      -      -    python         
+    0     296264     C      9      1      -      -      -      -    python         
+    0     296265     C      9      1      -      -      -      -    python         
+    0     296264     C      7      0      -      -      -      -    python         
+    0     296265     C     12      1      -      -      -      -    python         
+    0     296264     C      5      0      -      -      -      -    python         
+    0     296265     C     14      1      -      -      -      -    python         
+    0     300830     C      7      2      -      -      -      -    bench_ept12    
+    0     296264     C     22      4      -      -      -      -    python         
+    0     296265     C      9      1      -      -      -      -    python         
