@@ -329,16 +329,14 @@ int sgmScanIncAddI32( const uint32_t B     // desired CUDA block size ( <= 1024,
 
 /**
  *******************************************************
- * Single-Pass Scan Project, Step 1:
+ * Single-Pass Scan, baseline look-back, int32 only
  *******************************************************
  * `scanIncAddI32` adjusted to test `scanBlockLevel`.
  * Changes w.r.t. `scanIncAddI32`:
  *   - `d_tmp` is gone (the kernel needs no auxiliary array);
- *   - the sequential reference scans each chunk of
- *     CHUNK*B elements INDEPENDENTLY, because that is the
- *     semantics of step 1 -- not a device-wide scan;
  *   - the bandwidth figure uses 2n (n read, n written) instead
  *     of 3n, since this is a single pass over the data.
+ * The Task 4 variants are benchmarked by `bench_lookback.cu`.
  */
 int scanBlockAddI32(
     const uint32_t B,
@@ -346,7 +344,7 @@ int scanBlockAddI32(
     int* h_in,
     int* d_in,
     int* d_out,
-    Status* Fs,
+    void* d_ws,
     int* Ps,
     int* As,
     double gbs_ceiling
@@ -370,33 +368,13 @@ int scanBlockAddI32(
         numBlocks
     );
 
-    // Dynamic block counter
-    uint32_t* g_block_counter;
-
-    CUDASSERT(cudaMalloc(
-        (void**)&g_block_counter,
-        sizeof(uint32_t)
-    ));
-
     // -------------------------
-    // DRY RUN
+    // DRY RUN (scanBlockLevel resets counter + flags in d_ws itself)
     // -------------------------
-
-    CUDASSERT(cudaMemset(
-        g_block_counter,
-        0,
-        sizeof(uint32_t)
-    ));
-
-    CUDASSERT(cudaMemset(
-        Fs,
-        0,
-        numBlocks * sizeof(Status)
-    ));
 
     scanBlockLevel<Add<int>>(
         B, N, d_out, d_in,
-        Fs, Ps, As, g_block_counter
+        d_ws, Ps, As
     );
 
     cudaError_t err = cudaGetLastError();
@@ -418,25 +396,10 @@ int scanBlockAddI32(
     gettimeofday(&t_start, NULL);
 
     for (int i = 0; i < RUNS_GPU; i++) {
-
-        // Reset block numbering
-        CUDASSERT(cudaMemset(
-            g_block_counter,
-            0,
-            sizeof(uint32_t)
-        ));
-
-        // Reset status flags
-        CUDASSERT(cudaMemset(
-            Fs,
-            0,
-            numBlocks * sizeof(Status)
-        ));
-
-        // Single-pass scan
+        // Single-pass scan (resets counter + flags before the launch, I6)
         scanBlockLevel<Add<int>>(
             B, N, d_out, d_in,
-            Fs, Ps, As, g_block_counter
+            d_ws, Ps, As
         );
     }
 
@@ -444,9 +407,6 @@ int scanBlockAddI32(
     CUDASSERT(cudaPeekAtLastError());
 
     gettimeofday(&t_end, NULL);
-
-    // Free dynamic block counter
-    cudaFree(g_block_counter);
 
     timeval_subtract(
         &t_diff,
@@ -557,14 +517,14 @@ int main(int argc, char * argv[]) {
     // Number of CUDA blocks
     const size_t numBlocks = (N + (size_t)epb - 1) / epb;
 
-    // Global arrays for decoupled look-back
-    Status* Fs;
+    // Global arrays for decoupled look-back: workspace (counter + flags), aggregates, prefixes
+    void* d_ws;
     int* As;
     int* Ps;
 
     CUDASSERT(cudaMalloc(
-        (void**)&Fs,
-        numBlocks * sizeof(Status)
+        &d_ws,
+        scanWorkspaceBytes(numBlocks)
     ));
 
     CUDASSERT(cudaMalloc(
@@ -596,15 +556,14 @@ int main(int argc, char * argv[]) {
         sgmScanIncAddI32(B, N, h_in, d_in, d_out);
     }
 
-    { // Single-Pass Scan Project, step 1
-        cudaMemset(Fs, X, B);
-        scanBlockAddI32 (B, N, h_in, d_in, d_out, Fs, Ps, As, gbs_ceiling);
+    { // Single-Pass Scan (counter + flags are reset inside scanBlockLevel)
+        scanBlockAddI32 (B, N, h_in, d_in, d_out, d_ws, Ps, As, gbs_ceiling);
     }
     // cleanup memory
     free(h_in);
     cudaFree(d_in );
     cudaFree(d_out);
-    cudaFree(Fs);
+    cudaFree(d_ws);
     cudaFree(As);
     cudaFree(Ps);
 }

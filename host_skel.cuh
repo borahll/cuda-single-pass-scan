@@ -218,66 +218,75 @@ void scanInc( const uint32_t     B     // desired CUDA block size ( <= 1024, mul
 
 /**
  *******************************************************
- * Single-Pass Scan Project, Step 1:
+ * Single-Pass Scan (decoupled look-back)
  *******************************************************
- * `scanInc` adjusted to launch only `scanBlockKernel`.
- * Changes w.r.t. `scanInc`:
- *   - the `redAssocKernel` and `scan1Block` stages are gone:
- *     a single kernel does all the work;
- *   - `getNumBlocks` is gone. It existed only because
- *     `scan1Block` had to scan the per-block results inside
- *     ONE block, which forced num_blocks <= 1024 and hence
- *     the virtualization loop. Without that stage we simply
- *     spawn ceil(N / (CHUNK*B)) blocks;
- *   - `d_tmp` is gone.
- * NOTE: this does NOT compute a device-wide scan, see
- *   `scanBlockKernel`.
+ * Launches `scanBlockKernel`: one kernel, ceil(N / (CHUNK*B))
+ *   blocks, device-wide inclusive scan.
+ * `d_ws` is one workspace of `scanWorkspaceBytes(num_blocks)` bytes:
+ *   [block counter, padded to 8 B][flags: Status, or packed descriptors
+ *   of one 64-bit word per block (two for 64-bit elements)]. One memset resets counter and flags
+ *   together before every launch (I6). `Ps`/`As` need no reset.
+ * `LB`/`PACKED`/`LOCAL` select look-back variant, descriptor layout
+ *   and local phase (see `scanBlockKernel`).
  */
+inline size_t scanWorkspaceBytes(size_t num_blocks) {
+    return 8 + num_blocks * 2 * sizeof(unsigned long long);  // largest layout
+}
+
+// elements per thread of `scanBlockKernel` (same byte budget for every type)
 template<class OP>
+constexpr uint32_t scanChunk() {
+    constexpr uint32_t inp_sz = sizeof(typename OP::InpElTp);
+    constexpr uint32_t red_sz = sizeof(typename OP::RedElTp);
+    return ELEMS_PER_THREAD*4 / ((inp_sz > red_sz) ? inp_sz : red_sz);
+}
+
+// dynamic shared memory of `scanBlockKernel`
+template<class OP, bool LOCAL>
+size_t scanShmemBytes(const uint32_t B) {
+    constexpr uint32_t CHUNK = scanChunk<OP>();
+    using G = TileGeom<typename OP::RedElTp, CHUNK>;
+    if (LOCAL) return (size_t)B * G::PITCH * sizeof(typename G::U);
+    return (size_t)B * CHUNK * max(sizeof(typename OP::InpElTp), sizeof(typename OP::RedElTp));
+}
+
+template<class OP, int LB = LB_SERIAL, bool PACKED = false, bool LOCAL = false>
 void scanBlockLevel( const uint32_t     B     // desired CUDA block size ( <= 1024, multiple of 32)
                    , const size_t       N     // length of the input array
                    , typename OP::RedElTp* d_out // device array of length: N
                    , typename OP::InpElTp* d_in  // device array of length: N
-                    , Status* Fs
-                    , typename OP::RedElTp* Ps
-                    , typename OP::RedElTp* As
-                   , uint32_t *g_block_counter
+                   , void*              d_ws  // workspace, see above
+                   , typename OP::RedElTp* Ps
+                   , typename OP::RedElTp* As
 ) {
-    const uint32_t inp_sz = sizeof(typename OP::InpElTp);
-    const uint32_t red_sz = sizeof(typename OP::RedElTp);
-    const uint32_t max_tp_size = (inp_sz > red_sz) ? inp_sz : red_sz;
-    const uint32_t CHUNK = ELEMS_PER_THREAD*4 / max_tp_size;
+    constexpr uint32_t CHUNK = scanChunk<OP>();
     const uint32_t elems_per_block = CHUNK * B;
+
+    if (B == 0 || B % WARP != 0 || B > 1024 || N > UINT32_MAX - elems_per_block ||
+        (LOCAL && ((uintptr_t)d_in % 8 != 0 || (uintptr_t)d_out % 8 != 0))) {
+        fprintf(stderr, "scanBlockLevel: need B a nonzero multiple of 32 <= 1024, N < 2^32, "
+                        "and (LOCAL) 8-byte aligned arrays\n");
+        exit(1);
+    }
+    if (N == 0) return;                   // nothing to scan; a zero-block launch is an error
     const uint32_t num_blocks = (N + elems_per_block - 1) / elems_per_block;
-    const size_t   shmem_size = elems_per_block * max_tp_size;
 
-    // Step 2, malloc global counter
-    // Reset the block counter
-    cudaError_t err = cudaMemset(
-        g_block_counter, 0, sizeof(uint32_t)
-    );
-
-    CUDASSERT(err);
-
-    // Reset status flags
-    err = cudaMemset(
-        Fs, 0, num_blocks * sizeof(Status)
-    );
-    CUDASSERT(err);
+    // one memset: counter (first 8 bytes) + flags (X == 0); packed descriptors carry the flag
+    char* ws = (char*)d_ws;
+    const size_t desc_words = sizeof(typename OP::RedElTp) == 8 ? 2 : 1;
+    const size_t flag_bytes = num_blocks * (PACKED ? desc_words * sizeof(unsigned long long) : sizeof(Status));
+    CUDASSERT(cudaMemset(ws, 0, 8 + flag_bytes));
 
     // Clear any previous recorded runtime error
     cudaGetLastError();
 
-    // Launch kernel
-    scanBlockKernel<OP, CHUNK>
-        <<<num_blocks, B, shmem_size>>>(
-            d_out, d_in, N, Fs, Ps, As, g_block_counter
+    scanBlockKernel<OP, CHUNK, LB, PACKED, LOCAL>
+        <<<num_blocks, B, scanShmemBytes<OP, LOCAL>(B)>>>(
+            d_out, d_in, N, (Status*)(ws + 8), Ps, As, (unsigned long long*)(ws + 8), (uint32_t*)ws
         );
 
     // Check immediately
-    err = cudaGetLastError();
-
-    CUDASSERT(err);
+    CUDASSERT(cudaGetLastError());
 }
 
 /**

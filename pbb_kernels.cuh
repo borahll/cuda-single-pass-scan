@@ -3,6 +3,7 @@
 
 #include <cuda_runtime.h>
 #include <cuda/atomic>
+#include <cuda/std/type_traits>
 using namespace cuda;
 /**
  * Naive memcpy kernel, for the purpose of comparing with
@@ -183,13 +184,19 @@ scanIncWarp( volatile typename OP::RedElTp* ptr, const uint32_t idx ) {
     const uint32_t lane = idx & (WARP-1);
 
 #if 1
-    // new
+    // new. Lanes of a warp are not lockstep (independent thread scheduling,
+    //   sm_70+), so each step reads, syncs, writes, syncs; `volatile` alone
+    //   orders nothing between lanes. Must be called by all 32 lanes.
     #pragma unroll
     for(uint32_t d=0; d<lgWARP; d++) {
         const uint32_t h = (1<<d);
+        typename OP::RedElTp prev;
+        if(lane >= h) prev = OP::remVolatile(ptr[idx-h]);
+        __syncwarp();  // every lane has read step d's operand before any lane overwrites it
         if(lane >= h) {
-            ptr[idx] = OP::apply(ptr[idx-h], ptr[idx]);
+            ptr[idx] = OP::apply(prev, ptr[idx]);
         }
+        __syncwarp();  // step d's writes visible before step d+1 reads them
     }
 #else
     // original
@@ -732,24 +739,174 @@ scan3rdKernel ( typename OP::RedElTp* d_out
     }
 }
 
+/*************************************************/
+/*** Single-Pass Scan: decoupled look-back     ***/
+/*************************************************/
+
+/**
+ * Look-back variants (Task 4), selected by the `LB` template
+ *   parameter of `scanBlockKernel`:
+ *   LB_SERIAL    : baseline, thread 0 walks back one descriptor at
+ *                  a time and busy-waits on X;
+ *   LB_WARP_READ : 4.1, warp 0 reads 32 descriptors in one coalesced
+ *                  access into shared memory, thread 0 walks the copy;
+ *   LB_WARP_PAR  : 4.2, same window, reduced with ballot + shuffles;
+ *   LB_SKIP      : 4.3b, thread 0 skips X on the way back to the first
+ *                  P, then revisits the skipped interval forwards;
+ *   LB_WARP_PAR4 : 4.5, as 4.2 with 4 descriptors per lane (window 128),
+ *                  for GPUs whose first P is usually > 32 blocks back;
+ *   LB_WARP_PAR_KEEP, LB_WARP_PAR4_KEEP : 4.6, as 4.2 / 4.5, but after an X
+ *                  the window is kept and only the blocking X lanes re-read.
+ */
+enum LookBack { LB_SERIAL = 0, LB_WARP_READ = 1, LB_WARP_PAR = 2, LB_SKIP = 3, LB_WARP_PAR4 = 4,
+                LB_WARP_PAR_KEEP = 5, LB_WARP_PAR4_KEEP = 6 };
+
+/**
+ * 4.3c: debug-only instrumentation (compile with -DLOOKBACK_DEBUG).
+ *   Counters are summed over all blocks of one launch; the host
+ *   zeroes/reads `g_lbStats` with cudaMemcpy{To,From}Symbol.
+ *   The spin guard turns a hang into a kernel error.
+ */
+enum LBStat { LBS_BLOCKS     // blocks that ran a look-back (bid > 0)
+            , LBS_TRIPS      // global round trips (descriptor or window reads)
+            , LBS_X_READS    // reads that met X where it blocked progress
+            , LBS_X_BLOCKS   // blocks that met such an X at least once
+            , LBS_DIST_SUM   // sum over blocks of (bid - index of the P that stopped the walk)
+            , LBS_DIST_MAX
+            , LBS_HIST       // 9 buckets of that distance: 1,2,3-4,5-8,9-16,17-32,33-64,65-128,>128
+            , LBS_COUNT = LBS_HIST + 9 };
+#ifdef LOOKBACK_DEBUG
+__device__ unsigned long long g_lbStats[LBS_COUNT];
+#define LB_STAT(i, x) atomicAdd(&g_lbStats[i], (unsigned long long)(x))
+#define LB_SPIN_GUARD(n) if (++(n) > (1u << 26)) { printf("look-back hang: block %u\n", bid); __trap(); }
+#else
+#define LB_STAT(i, x)    ((void)0)
+#define LB_SPIN_GUARD(n) ((void)0)
+#endif
+
+#ifdef LOOKBACK_DEBUG
+__device__ inline void lbStatDistance(uint32_t d, uint32_t xreads) {
+    LB_STAT(LBS_BLOCKS, 1);
+    LB_STAT(LBS_X_READS, xreads);
+    LB_STAT(LBS_X_BLOCKS, xreads > 0);
+    LB_STAT(LBS_DIST_SUM, d);
+    atomicMax(&g_lbStats[LBS_DIST_MAX], (unsigned long long)d);
+    uint32_t b = (d <= 1) ? 0 : min(32 - __clz(d - 1), 8);  // ceil(log2 d), capped
+    LB_STAT(LBS_HIST + b, 1);
+}
+#define LB_STAT_DIST(d, xreads) lbStatDistance((d), (xreads))
+#else
+#define LB_STAT_DIST(d, xreads) ((void)0)
+#endif
+
+/**
+ * Descriptor of block j, in one of two layouts:
+ *   - separate arrays (default): flag `Fs[j]`, aggregate `As[j]`,
+ *     inclusive prefix `Ps[j]`;
+ *   - packed (4.3a), elements of at most 32 bits: one 64-bit word
+ *     `Ds[j] = flag << 32 | value bits` (bit copy, so floats survive
+ *     unchanged);
+ *   - packed, 64-bit elements: two 64-bit words, each carrying its own
+ *     copy of the flag, `Ds[2j] = flag << 32 | low 32 value bits`,
+ *     `Ds[2j+1] = flag << 32 | high 32 value bits`. Each word is
+ *     written once per flag (I4), so two words with equal flags come
+ *     from the same publish; unequal flags read as X (retry, I3).
+ *   X encodes as 0, so a zero memset of `Ds` resets every flag (I6).
+ * These two functions are the only places that touch descriptors,
+ *   so the I5 ordering is written once.
+ */
+template<class T, bool PACKED>
+__device__ inline void
+publishDesc(uint32_t j, Status f, T v, Status* Fs, T* Ps, T* As, unsigned long long* Ds) {
+    if constexpr (PACKED && sizeof(T) == 8) {
+        unsigned long long bits;
+        memcpy(&bits, &v, 8);
+        // each half carries the flag: no order needed between the two stores
+        //   (a reader that sees only one of them gets unequal flags)
+        atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j])
+            .store(((unsigned long long)f << 32) | (uint32_t)bits, memory_order_relaxed);
+        atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j + 1])
+            .store(((unsigned long long)f << 32) | (bits >> 32), memory_order_relaxed);
+    } else if constexpr (PACKED) {
+        uint32_t bits = 0;
+        memcpy(&bits, &v, sizeof(T));     // copy the bits: a numeric cast would truncate floats
+        // flag and value travel in one 64-bit store: nothing to order between them
+        atomic_ref<unsigned long long, thread_scope_device>(Ds[j])
+            .store(((unsigned long long)f << 32) | bits, memory_order_relaxed);
+    } else {
+        if (f == P) Ps[j] = v; else As[j] = v;
+        // release: the value store above becomes visible no later than the flag (I5 writer)
+        atomic_ref<Status, thread_scope_device>(Fs[j]).store(f, memory_order_release);
+    }
+}
+
+// Returns the flag of block j; `v` is its aggregate (A) or inclusive prefix (P), undefined for X.
+template<class T, bool PACKED>
+__device__ inline Status
+loadDesc(int j, T& v, Status* Fs, T* Ps, T* As, unsigned long long* Ds) {
+    if constexpr (PACKED && sizeof(T) == 8) {
+        // two independent loads, each with its own flag: nothing to order between them
+        unsigned long long lo = atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j])
+                                    .load(memory_order_relaxed);
+        unsigned long long hi = atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j + 1])
+                                    .load(memory_order_relaxed);
+        if ((lo >> 32) != (hi >> 32)) return X;  // halves of different publishes: not ready yet
+        unsigned long long bits = (hi << 32) | (uint32_t)lo;
+        memcpy(&v, &bits, 8);
+        return (Status)(lo >> 32);
+    } else if constexpr (PACKED) {
+        // one 64-bit load returns flag and value together: nothing to order between them
+        unsigned long long w = atomic_ref<unsigned long long, thread_scope_device>(Ds[j])
+                                   .load(memory_order_relaxed);
+        uint32_t bits = (uint32_t)w;
+        memcpy(&v, &bits, sizeof(T));     // low sizeof(T) bytes (little-endian), inverse of publishDesc
+        return (Status)(w >> 32);
+    } else {
+        // acquire: the value load below cannot be performed before the flag load (I5 reader)
+        Status f = atomic_ref<Status, thread_scope_device>(Fs[j]).load(memory_order_acquire);
+        if (f == P) v = Ps[j];
+        else if (f == A) v = As[j];
+        return f;
+    }
+}
+
+/**
+ * 4.4 local-phase tile geometry. The tile holds one row per thread,
+ *   CHUNK elements = 4*ELEMS_PER_THREAD bytes, stored in units U:
+ *   4-byte words (8 bytes for 64-bit elements), E elements per unit,
+ *   UPT units per row. Global copies move whole units (one 32/64-bit
+ *   access instead of up to 4 narrow ones). The row pitch is odd in
+ *   units, so 32 threads reading the same column of their own rows hit
+ *   32 different banks (an even pitch, e.g. 24 words, gives 8-way
+ *   conflicts).
+ */
+template<class T, int CHUNK>
+struct TileGeom {
+    using U = typename ::cuda::std::conditional<(sizeof(T) > 4), unsigned long long, uint32_t>::type;
+    static constexpr uint32_t E     = sizeof(U) / sizeof(T);
+    static constexpr uint32_t UPT   = CHUNK / E;
+    static constexpr uint32_t PITCH = UPT | 1;
+    static_assert(CHUNK % E == 0, "a thread's elements must fill whole units");
+};
+
 /**
  *******************************************************
- * Single-Pass Scan Project, Step 1:
+ * Single-Pass Scan (Merrill & Garland, decoupled look-back)
  *******************************************************
- * `scan3rdKernel` adjusted so that each CUDA block scans ONE
- *   chunk of CHUNK*blockDim.x elements, independently of all
- *   other blocks. Changes w.r.t. `scan3rdKernel`:
- *     - the "virtualization" loop is removed: one block
- *       processes exactly one chunk;
- *     - parameters `d_tmp` and `num_seq_chunks` are removed,
- *       together with the `accum` variable: a block knows
- *       nothing about the blocks preceding it.
- *   Everything else (steps 1-9 below) is unchanged.
- * NOTE: the result is NOT a device-wide scan; each chunk is
- *   scanned on its own. Steps 2-4 of the project add the
- *   inter-block communication on top of this.
+ * Each CUDA block scans ONE chunk of CHUNK*blockDim.x elements and
+ *   obtains its exclusive offset from its predecessors' descriptors.
+ *   Chunk order is the DYNAMIC block index `bid` (atomic counter),
+ *   never `blockIdx.x` (I7).
+ * `LB` selects the look-back variant (see `LookBack`); `PACKED`
+ *   selects the packed descriptor layout (4.3a; two words per
+ *   descriptor for 64-bit elements, see `publishDesc`).
+ * `LOCAL` selects the per-block (local) phase:
+ *   false: Task 3 local phase (copy helpers + `scanIncBlock`, 12 barriers);
+ *   true : 4.4 local phase, see `TileGeom` and the steps below (4 barriers).
+ * The host must reset `*g_block_counter` and the flags (`Fs`, or
+ *   `Ds` if packed) to 0 before every launch (I6).
  */
-template<class OP, int CHUNK>
+template<class OP, int CHUNK, int LB, bool PACKED, bool LOCAL>
 __global__ void
 scanBlockKernel ( typename OP::RedElTp* d_out
                 , typename OP::InpElTp* d_in
@@ -757,8 +914,11 @@ scanBlockKernel ( typename OP::RedElTp* d_out
                 , Status* Fs
                 , typename OP::RedElTp* Ps
                 , typename OP::RedElTp* As
+                , unsigned long long* Ds
                 , uint32_t *g_block_counter
 ) {
+    using T = typename OP::RedElTp;
+    constexpr bool PK = PACKED;
 
 
     // step 2, global block counter
@@ -785,103 +945,381 @@ scanBlockKernel ( typename OP::RedElTp* d_out
     // the current block start processing input elements from this offset:
     uint32_t inp_block_offs = CHUNK * blockDim.x * bid;
 
-    // register memory for storing the scanned elements.
-    typename OP::RedElTp chunk[CHUNK];
-
-    // 1. copy `CHUNK` input elements per thread from global to shared memory
-    //    in coalesced fashion (for global memory)
-    copyFromGlb2ShrMem<typename OP::InpElTp, CHUNK>
-              (inp_block_offs, N, OP::identInp(), d_in, shmem_inp);
-
-    // 2. each thread sequentially scans its `CHUNK` elements
-    //    and stores the result in the `chunk` array. The reduced
-    //    result is stored in `tmp`.
+    // register memory for storing the scanned elements (Task 3 local phase only).
+    typename OP::RedElTp chunk[LOCAL ? 1 : CHUNK];
     typename OP::RedElTp tmp = OP::identity();
-    uint32_t shmem_offset = threadIdx.x * CHUNK;
-    #pragma unroll
-    for (uint32_t i = 0; i < CHUNK; i++) {
-        typename OP::InpElTp elm = shmem_inp[shmem_offset + i];
-        typename OP::RedElTp red = OP::mapFun(elm);
-        tmp = OP::apply(tmp, red);
-        chunk[i] = tmp;
-    }
-    __syncthreads();
 
-    // 3. Each thread publishes in shared memory the reduced result of its
-    //    `CHUNK` elements
-    shmem_red[threadIdx.x] = tmp;
-    __syncthreads();
+    // 4.4 local phase: tile in shared memory as one row per thread, in units
+    //   of U (4-byte words, or 8 bytes for 64-bit elements); see `TileGeom`.
+    using G = TileGeom<T, CHUNK>;
+    using U = typename G::U;
+    U* tile = (U*)sh_mem;
+    const uint32_t row = threadIdx.x * G::PITCH;          // this thread's row
+    const size_t   blk_unit = (size_t)bid * blockDim.x * G::UPT;
+    const size_t   full_units = N / G::E;                 // units entirely inside the array
+    const bool     full_tile  = blk_unit + (size_t)blockDim.x * G::UPT <= full_units;  // block-uniform
+    T thrExcl = OP::identity();                           // block-local exclusive prefix of this thread
 
-    // 4. perform an intra-CUDA-block scan
-    tmp = scanIncBlock<OP>(shmem_red, threadIdx.x);
-    __syncthreads();
+    T blockAggregate;                     // valid in thread 0 only
 
-    // 5. write the scan result back to shared memory
-    shmem_red[threadIdx.x] = tmp;
-    __syncthreads();
+    if constexpr (!LOCAL) {
+        // 1. copy `CHUNK` input elements per thread from global to shared memory
+        //    in coalesced fashion (for global memory)
+        copyFromGlb2ShrMem<typename OP::InpElTp, CHUNK>
+                  (inp_block_offs, N, OP::identInp(), d_in, shmem_inp);
 
-    typename OP::RedElTp blockAggregate;
-    __shared__ typename OP::RedElTp blockOffset;
-    if(threadIdx.x == 0){
-        blockAggregate = OP::remVolatile(shmem_red[blockDim.x - 1]);
-    }
-
-    if(threadIdx.x == 0){
-        if(bid == 0){
-            blockOffset = OP::identity();
-            Ps[bid] = blockAggregate;
-            atomic_ref<Status, thread_scope_device> flag(Fs[bid]);
-            flag.store(P, memory_order_release);
+        // 2. each thread sequentially scans its `CHUNK` elements
+        //    and stores the result in the `chunk` array. The reduced
+        //    result is stored in `tmp`.
+        uint32_t shmem_offset = threadIdx.x * CHUNK;
+        #pragma unroll
+        for (uint32_t i = 0; i < CHUNK; i++) {
+            typename OP::InpElTp elm = shmem_inp[shmem_offset + i];
+            typename OP::RedElTp red = OP::mapFun(elm);
+            tmp = OP::apply(tmp, red);
+            chunk[i] = tmp;
         }
-        else{
-            As[bid] = blockAggregate; //this blocks agg.
-            atomic_ref<Status, thread_scope_device> myFlag(Fs[bid]);
-            myFlag.store(A, memory_order_release);
-            int blockNum = static_cast<int>(bid) - 1;
-            typename OP::RedElTp prefix = OP::identity();  
-            while(blockNum >= 0){
-                atomic_ref<Status, thread_scope_device> prevFlag(Fs[blockNum]); //the flag
-                Status currFlag = prevFlag.load(memory_order_acquire);
-                if(currFlag == P){
-                    prefix = OP::apply(Ps[blockNum], prefix);
+        __syncthreads();  // all reads of shmem_inp done before shmem_red (same bytes) is written
+
+        // 3. Each thread publishes in shared memory the reduced result of its
+        //    `CHUNK` elements
+        shmem_red[threadIdx.x] = tmp;
+        __syncthreads();  // per-thread sums visible to the block-level scan
+
+        // 4. perform an intra-CUDA-block scan
+        tmp = scanIncBlock<OP>(shmem_red, threadIdx.x);
+        __syncthreads();  // scan reads of shmem_red done before it is overwritten below
+
+        // 5. write the scan result back to shared memory
+        shmem_red[threadIdx.x] = tmp;
+        __syncthreads();  // scanned sums visible: thread 0 reads the aggregate, threads read [tid-1]
+
+        if(threadIdx.x == 0){
+            blockAggregate = OP::remVolatile(shmem_red[blockDim.x - 1]);
+        }
+    } else {
+        static_assert(sizeof(typename OP::InpElTp) == sizeof(T), "4.4 local phase: map must preserve size");
+        // L1. coalesced load in units: unit w = tid + k*B of the block goes to
+        //     row w/UPT, column w%UPT. Full tiles (all blocks but the last) take
+        //     the unchecked path; in the last tile a unit straddling N is
+        //     assembled element by element with the identity beyond N.
+        const U* in_u = (const U*)d_in + blk_unit;      // this block's first unit
+        if (full_tile) {
+            #pragma unroll
+            for (uint32_t k = 0; k < G::UPT; k++) {
+                const uint32_t w = threadIdx.x + k * blockDim.x;
+                tile[(w / G::UPT) * G::PITCH + w % G::UPT] = in_u[w];
+            }
+        } else {
+            for (uint32_t k = 0; k < G::UPT; k++) {
+                const uint32_t w  = threadIdx.x + k * blockDim.x;
+                const size_t   gu = blk_unit + w;
+                U u;
+                if (gu < full_units) {
+                    u = in_u[w];
+                } else {
+                    T e[G::E];
+                    #pragma unroll
+                    for (uint32_t q = 0; q < G::E; q++) {
+                        const size_t gi = gu * G::E + q;
+                        e[q] = (gi < N) ? (T)d_in[gi] : OP::identInp();
+                    }
+                    memcpy(&u, e, sizeof(U));
+                }
+                tile[(w / G::UPT) * G::PITCH + w % G::UPT] = u;
+            }
+        }
+        __syncthreads();  // whole tile in shared memory before each thread reads its own row
+
+        // L2. thread total over its own row (conflict-free: odd row pitch)
+        T total = OP::identity();
+        #pragma unroll
+        for (uint32_t k = 0; k < G::UPT; k++) {
+            U u = tile[row + k];
+            T e[G::E];
+            memcpy(e, &u, sizeof(U));
+            #pragma unroll
+            for (uint32_t q = 0; q < G::E; q++) total = OP::apply(total, OP::mapFun(e[q]));
+        }
+
+        // L3. block scan of thread totals in registers: warp scan with shuffles,
+        //     then the (at most 32) warp totals through shared memory
+        const uint32_t lane = threadIdx.x & (WARP - 1), warp = threadIdx.x >> lgWARP;
+        T x = total;
+        #pragma unroll
+        for (uint32_t d = 1; d < WARP; d <<= 1) {
+            T y = __shfl_up_sync(0xFFFFFFFF, x, d);
+            if (lane >= d) x = OP::apply(y, x);
+        }
+        T warpExcl = __shfl_up_sync(0xFFFFFFFF, x, 1);
+        if (lane == 0) warpExcl = OP::identity();
+        __shared__ T warpTot[WARP];
+        if (lane == WARP - 1) warpTot[warp] = x;
+        __syncthreads();  // warp totals visible to every thread
+        T before = OP::identity();        // reduction of the warps before this one
+        for (uint32_t w = 0; w < warp; w++) before = OP::apply(before, warpTot[w]);
+        thrExcl = OP::apply(before, warpExcl);
+        if (threadIdx.x == 0) {
+            blockAggregate = OP::identity();
+            for (uint32_t w = 0; w < blockDim.x / WARP; w++) blockAggregate = OP::apply(blockAggregate, warpTot[w]);
+        }
+    }
+
+    // decoupled look-back: publish A, find the exclusive offset, publish P.
+    //    Prefixes are combined as apply(earlier, later), so OP need not commute.
+    __shared__ T blockOffset;
+
+    if (bid == 0) {
+        if (threadIdx.x == 0) {
+            blockOffset = OP::identity();
+            publishDesc<T, PK>(0, P, blockAggregate, Fs, Ps, As, Ds);
+        }
+    } else if (threadIdx.x < WARP) {      // warp 0 runs the look-back (only thread 0 in serial variants)
+        const uint32_t lane = threadIdx.x;
+        // A before the look-back, so successors need not wait for our P
+        if (lane == 0) publishDesc<T, PK>(bid, A, blockAggregate, Fs, Ps, As, Ds);
+        T prefix = OP::identity();        // offset accumulated so far; valid in lane 0
+        [[maybe_unused]] uint32_t xreads = 0;  // reads that met a blocking X (stats + spin guard)
+
+        if constexpr (LB == LB_SERIAL) {
+            // baseline: walk back one descriptor per round trip, busy-wait on X
+            if (lane == 0) {
+                int j = (int)bid - 1;
+                while (true) {            // terminates: block 0 always ends with P
+                    T v;
+                    Status f = loadDesc<T, PK>(j, v, Fs, Ps, As, Ds);
+                    LB_STAT(LBS_TRIPS, 1);
+                    if (f == X) { LB_SPIN_GUARD(xreads); continue; }  // re-read, never skip (I3)
+                    prefix = OP::apply(v, prefix);
+                    if (f == P) break;    // P covers 0..j (I2)
+                    j--;
+                }
+                LB_STAT_DIST(bid - j, xreads);
+            }
+        } else if constexpr (LB == LB_SKIP) {
+            // 4.3b: backwards to the first P without waiting on X, then
+            //   forwards over the skipped interval, waiting where still X.
+            //   Aggregates read before the first X (blocks hi+1..bid-1) are
+            //   kept in `suffix` and not re-read (valid by I4).
+            if (lane == 0) {
+                [[maybe_unused]] uint32_t skipped = 0;        // number of X blocks skipped (stats)
+                int j = (int)bid - 1;
+                int hi = -1;              // highest block seen as X; -1 = none so far
+                T suffix = OP::identity();
+                T v;
+                Status f;
+                while (true) {
+                    f = loadDesc<T, PK>(j, v, Fs, Ps, As, Ds);
+                    LB_STAT(LBS_TRIPS, 1);
+                    if (f == P) break;
+                    if (f == X) {
+                        if (j == 0) { LB_SPIN_GUARD(xreads); continue; }  // nothing before block 0 to skip to
+                        skipped++;
+                        if (hi < 0) hi = j;
+                    } else if (hi < 0) {
+                        suffix = OP::apply(v, suffix);
+                    }
+                    j--;
+                }
+                prefix = v;               // Ps[j] covers 0..j
+                for (int i = j + 1; i <= hi; ) {
+                    f = loadDesc<T, PK>(i, v, Fs, Ps, As, Ds);
+                    LB_STAT(LBS_TRIPS, 1);
+                    if (f == X) { LB_SPIN_GUARD(xreads); continue; }  // wait: skipping again would leave a hole (I1, I3)
+                    prefix = (f == P) ? v : OP::apply(prefix, v);     // P covers 0..i: replace
+                    i++;
+                }
+                prefix = OP::apply(prefix, suffix);
+                LB_STAT_DIST(bid - j, xreads + skipped);
+            }
+        } else if constexpr (LB == LB_WARP_READ) {
+            // 4.1: lane i reads block base-i (one coalesced access); lane 0 walks the copy
+            __shared__ Status winF[WARP];
+            __shared__ T      winV[WARP];
+            int base = (int)bid - 1;
+            while (true) {
+                int j = base - (int)lane;
+                T v = OP::identity();
+                Status f = X;             // lanes before block 0 read nothing; the walk stops at block 0
+                if (j >= 0) f = loadDesc<T, PK>(j, v, Fs, Ps, As, Ds);
+                winF[lane] = f;
+                winV[lane] = v;
+                if (lane == 0) LB_STAT(LBS_TRIPS, 1);
+                __syncwarp();             // window writes visible to lane 0
+                int state = 0;            // 0: X before the first P, re-read; 1: no P, slide; 2: done
+                if (lane == 0) {
+                    T acc = OP::identity();
+                    int i = 0;
+                    state = 1;
+                    for (; i < WARP; i++) {
+                        Status fi = winF[i];
+                        if (fi == X) { state = 0; break; }  // never skip X (I3)
+                        acc = OP::apply(winV[i], acc);
+                        if (fi == P) { state = 2; break; }  // I2
+                    }
+                    if (state != 0) prefix = OP::apply(acc, prefix);
+                    else LB_SPIN_GUARD(xreads);
+                    if (state == 2) LB_STAT_DIST(bid - (base - i), xreads);
+                }
+                state = __shfl_sync(0xFFFFFFFF, state, 0);  // warp-uniform loop decision
+                __syncwarp();             // lane 0 is done reading the window before it is overwritten
+                if (state == 2) break;
+                if (state == 1) base -= WARP;
+            }
+        } else if constexpr (LB == LB_WARP_PAR || LB == LB_WARP_PAR4 ||
+                             LB == LB_WARP_PAR_KEEP || LB == LB_WARP_PAR4_KEEP) {
+            // 4.2: same window as 4.1, combined in parallel by the warp.
+            //   LB_WARP_PAR4 (4.5): K = 4 descriptors per lane, window of 128.
+            //   Round r: lane l reads rank l + 32r, i.e. block base - rank
+            //   (one coalesced access per round, all K rounds in flight together).
+            //   *_KEEP (4.6): after a blocking X the window is kept; the next pass
+            //   re-reads only the X lanes before the closest P. Best effort: an A
+            //   already read is reused (I4) even if its block has since published P.
+            constexpr int K = (LB == LB_WARP_PAR4 || LB == LB_WARP_PAR4_KEEP) ? 4 : 1;
+            constexpr bool KEEP = (LB == LB_WARP_PAR_KEEP || LB == LB_WARP_PAR4_KEEP);
+            int base = (int)bid - 1;
+            T v[K];
+            Status f[K];
+            int pr = K;                   // round holding the closest P; K = none
+            unsigned upto = 0xFFFFFFFF;   // in round pr: lanes 0..(closest P) inclusive
+            #pragma unroll
+            for (int r = 0; r < K; r++) f[r] = X;  // nothing read yet: every lane reads
+            while (true) {
+                #pragma unroll
+                for (int r = 0; r < K; r++) {
+                    bool blocking = f[r] == X && (r < pr || (r == pr && ((upto >> lane) & 1)));
+                    if (!KEEP || blocking) {
+                        int j = base - (int)(lane + WARP * r);
+                        v[r] = OP::identity();
+                        f[r] = A;         // ranks before block 0: identity, never counted as X
+                        if (j >= 0) f[r] = loadDesc<T, PK>(j, v[r], Fs, Ps, As, Ds);
+                    }
+                }
+                if (lane == 0) LB_STAT(LBS_TRIPS, 1);
+                // walk rounds in rank order: closest P = lowest lane of the first round
+                //   that has one; an X at a smaller rank blocks the walk at its round (I3)
+                pr = K;
+                upto = 0xFFFFFFFF;
+                int xr = K;               // round of the first blocking X; rounds before it are all A
+                #pragma unroll
+                for (int r = 0; r < K; r++) {
+                    unsigned pmask = __ballot_sync(0xFFFFFFFF, f[r] == P);
+                    unsigned xmask = __ballot_sync(0xFFFFFFFF, f[r] == X);
+                    if (pr == K) {        // still at ranks before the closest P
+                        unsigned up = (pmask & (0u - pmask)) * 2 - 1;  // all lanes if no P
+                        if (xr == K && (xmask & up)) xr = r;
+                        if (pmask) { pr = r; upto = up; }
+                    }
+                }
+                if (KEEP && xr < K) {     // window kept, next pass re-reads the blocking X lanes (I3)
+                    if (lane == 0) LB_SPIN_GUARD(xreads);
+                    continue;
+                }
+                // rounds 0..pr (or the all-A rounds 0..xr-1), each an ordered tree
+                //   reduction (lane i+d holds blocks earlier than lane i); round r is
+                //   earlier than round r-1
+                #pragma unroll
+                for (int r = 0; r < K; r++) {
+                    if (r > pr || r >= xr) break;  // warp-uniform
+                    T x = (r < pr || ((upto >> lane) & 1)) ? v[r] : OP::identity();
+                    #pragma unroll
+                    for (int d = 1; d < WARP; d <<= 1) {
+                        T y = __shfl_down_sync(0xFFFFFFFF, x, d);
+                        if (lane + d < WARP) x = OP::apply(y, x);
+                    }
+                    if (lane == 0) prefix = OP::apply(x, prefix);
+                }
+                if (xr < K) {             // X before the closest P: keep the all-A rounds
+                    if (lane == 0) LB_SPIN_GUARD(xreads);  //   (I4), re-read from round xr (I3)
+                    base -= WARP * xr;
+                    continue;
+                }
+                if (pr < K) {             // I2
+                    if (lane == 0) LB_STAT_DIST(bid - (base - (WARP * pr + __popc(upto) - 1)), xreads);
                     break;
                 }
-                else if(currFlag == A){
-                    prefix = OP::apply(As[blockNum], prefix);
-                    blockNum--;
-                }
-                //X will run again
+                base -= WARP * K;
+                #pragma unroll
+                for (int r = 0; r < K; r++) f[r] = X;  // new window: values of the old one must not be reused (I1)
             }
+        }
+
+        if (lane == 0) {
             blockOffset = prefix;
-            Ps[bid] = OP::apply(blockOffset, blockAggregate);
-            myFlag.store(P, memory_order_release);
+#ifndef LOOKBACK_NO_P
+            publishDesc<T, PK>(bid, P, OP::apply(prefix, blockAggregate), Fs, Ps, As, Ds);
+#endif
         }
     }
-    __syncthreads();
+    __syncthreads();                      // blockOffset visible to the whole block
 
-    // 6. the previous element is read from shared memory in `tmp`:
-    //       it is the prefix of the previous threads in the current block.
-    tmp   = OP::identity();
-    if (threadIdx.x > 0)
-        tmp = OP::remVolatile(shmem_red[threadIdx.x-1]);
-    tmp = OP::apply(blockOffset, tmp);
-    // KEEP this barrier: it separates the reads of `shmem_red[threadIdx.x-1]`
-    //   above from the writes to `shmem_red[threadIdx.x*CHUNK + i]` below,
-    //   which overlap. (In `scan3rdKernel` it sat after the `accum` update.)
-    __syncthreads();
+    if constexpr (!LOCAL) {
+        // 6. the previous element is read from shared memory in `tmp`:
+        //       it is the prefix of the previous threads in the current block.
+        tmp   = OP::identity();
+        if (threadIdx.x > 0)
+            tmp = OP::remVolatile(shmem_red[threadIdx.x-1]);
+        tmp = OP::apply(blockOffset, tmp);
+        // KEEP this barrier: it separates the reads of `shmem_red[threadIdx.x-1]`
+        //   above from the writes to `shmem_red[threadIdx.x*CHUNK + i]` below,
+        //   which overlap. (In `scan3rdKernel` it sat after the `accum` update.)
+        __syncthreads();
 
-    // 9. the `tmp` prefix is accumulated to all the `CHUNK` elements
-    //      locally processed by the current thread (i.e., the ones
-    //      in `chunk` array hold in registers).
-    #pragma unroll
-    for (uint32_t i = 0; i < CHUNK; i++) {
-        shmem_red[threadIdx.x*CHUNK + i] = OP::apply(tmp, chunk[i]);
+        // 9. the `tmp` prefix is accumulated to all the `CHUNK` elements
+        //      locally processed by the current thread (i.e., the ones
+        //      in `chunk` array hold in registers).
+        #pragma unroll
+        for (uint32_t i = 0; i < CHUNK; i++) {
+            shmem_red[threadIdx.x*CHUNK + i] = OP::apply(tmp, chunk[i]);
+        }
+        __syncthreads();  // results in shared memory before the coalesced (transposed) copy-out
+
+        // 5. write back from shared to global memory in coalesced fashion.
+        copyFromShr2GlbMem<typename OP::RedElTp, CHUNK>
+                  (inp_block_offs, N, d_out, shmem_red);
+    } else {
+        // L4. re-read the own row and overwrite it in place with the final
+        //     inclusive prefixes (no per-element registers kept across the look-back)
+        T run = OP::apply(blockOffset, thrExcl);
+        #pragma unroll
+        for (uint32_t k = 0; k < G::UPT; k++) {
+            U u = tile[row + k];
+            T e[G::E];
+            memcpy(e, &u, sizeof(U));
+            #pragma unroll
+            for (uint32_t q = 0; q < G::E; q++) { run = OP::apply(run, OP::mapFun(e[q])); e[q] = run; }
+            memcpy(&u, e, sizeof(U));
+            tile[row + k] = u;
+        }
+        __syncthreads();  // all rows final before the striped copy-out reads other threads' rows
+
+        // L5. coalesced store in units, mirror of L1; elements beyond N are not written
+        U* out_u = (U*)d_out + blk_unit;
+        if (full_tile) {
+            #pragma unroll
+            for (uint32_t k = 0; k < G::UPT; k++) {
+                const uint32_t w = threadIdx.x + k * blockDim.x;
+                out_u[w] = tile[(w / G::UPT) * G::PITCH + w % G::UPT];
+            }
+        } else {
+            for (uint32_t k = 0; k < G::UPT; k++) {
+                const uint32_t w  = threadIdx.x + k * blockDim.x;
+                const size_t   gu = blk_unit + w;
+                U u = tile[(w / G::UPT) * G::PITCH + w % G::UPT];
+                if (gu < full_units) {
+                    out_u[w] = u;
+                } else {
+                    T e[G::E];
+                    memcpy(e, &u, sizeof(U));
+                    #pragma unroll
+                    for (uint32_t q = 0; q < G::E; q++) {
+                        const size_t gi = gu * G::E + q;
+                        if (gi < N) d_out[gi] = e[q];
+                    }
+                }
+            }
+        }
     }
-    __syncthreads();
-
-    // 5. write back from shared to global memory in coalesced fashion.
-    copyFromShr2GlbMem<typename OP::RedElTp, CHUNK>
-              (inp_block_offs, N, d_out, shmem_red);
 }
 
 
