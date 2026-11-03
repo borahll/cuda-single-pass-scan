@@ -556,9 +556,8 @@ int main(int argc, char * argv[]) {
         sgmScanIncAddI32(B, N, h_in, d_in, d_out);
     }
 
-    { // Single-Pass Scan (counter + flags are reset inside scanBlockLevel)
-        scanBlockAddI32 (B, N, h_in, d_in, d_out, d_ws, Ps, As, gbs_ceiling);
-    }
+    // Single-Pass Scan (counter + flags are reset inside scanBlockLevel)
+    const int result = scanBlockAddI32 (B, N, h_in, d_in, d_out, d_ws, Ps, As, gbs_ceiling);
     // cleanup memory
     free(h_in);
     cudaFree(d_in );
@@ -566,4 +565,5 @@ int main(int argc, char * argv[]) {
     cudaFree(d_ws);
     cudaFree(As);
     cudaFree(Ps);
+    return result;
 }

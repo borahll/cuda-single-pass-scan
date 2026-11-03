@@ -247,6 +247,11 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
     const char* only = (argc > 5) ? argv[5] : NULL;
+    if (only && strcmp(only, "u8") && strcmp(only, "u16") &&
+        strcmp(only, "u32") && strcmp(only, "u64") && strcmp(only, "f32")) {
+        fprintf(stderr, "Unknown element type '%s'; expected u8, u16, u32, u64, or f32\n", only);
+        return 1;
+    }
 
     initHwd();
     printf("type,bytes,N,variant,us,GBps,pct_memcpy,pct_cub,blocks_per_sm,check\n");

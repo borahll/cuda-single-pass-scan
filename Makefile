@@ -7,7 +7,7 @@ ARCH?=native
 PBB_MAIN=test_pbb
 BENCH=bench_lookback
 
-.PHONY: clean all run bench bench_stats test_lookback sanitize
+.PHONY: clean all run bench bench_stats test_lookback sanitize FORCE
 
 ELEMS_PER_THREAD=24
 N=100003565
@@ -18,7 +18,7 @@ default: bench
 
 all: $(PBB_MAIN) $(BENCH) $(BENCH)_debug $(BENCH)_nop
 
-$(PBB_MAIN): pbb_main.cu host_skel.cuh pbb_kernels.cuh constants.cuh
+$(PBB_MAIN): pbb_main.cu host_skel.cuh pbb_kernels.cuh constants.cuh FORCE
 	$(COMPILER) $(OPT_FLAGS) -arch=$(ARCH) -DELEMS_PER_THREAD=$(ELEMS_PER_THREAD) -o $(PBB_MAIN) $<
 
 run: $(PBB_MAIN)
@@ -35,15 +35,15 @@ test: $(PBB_MAIN)
 SIZES=98304 262144 1048576 4194304 16777216 67108864 268435456 536870912
 DEPS=bench_lookback.cu host_skel.cuh pbb_kernels.cuh constants.cuh
 
-$(BENCH): $(DEPS)
+$(BENCH): $(DEPS) FORCE
 	$(COMPILER) $(OPT_FLAGS) -arch=$(ARCH) -DELEMS_PER_THREAD=$(ELEMS_PER_THREAD) -o $@ $<
 
 # 4.3c statistics + bounded spin (timings from this binary are not representative)
-$(BENCH)_debug: $(DEPS)
+$(BENCH)_debug: $(DEPS) FORCE
 	$(COMPILER) $(OPT_FLAGS) -arch=$(ARCH) -DELEMS_PER_THREAD=$(ELEMS_PER_THREAD) -DLOOKBACK_DEBUG -o $@ $<
 
 # only block 0 publishes P: every look-back walks to block 0 (window slides, k < 32, 4.3b forward pass)
-$(BENCH)_nop: $(DEPS)
+$(BENCH)_nop: $(DEPS) FORCE
 	$(COMPILER) $(OPT_FLAGS) -arch=$(ARCH) -DELEMS_PER_THREAD=$(ELEMS_PER_THREAD) -DLOOKBACK_DEBUG -DLOOKBACK_NO_P -o $@ $<
 
 bench: $(BENCH)
@@ -60,6 +60,9 @@ test_lookback: $(BENCH)_debug $(BENCH)_nop
 sanitize: $(BENCH)
 	for t in racecheck synccheck memcheck; do for s in 98305 1000003; do \
 	  compute-sanitizer --tool $$t --error-exitcode 1 ./$(BENCH) $$s $(B) 1 1 > /dev/null || exit 1; done; done
+
+# Rebuild so changes to command-line compiler settings always take effect.
+FORCE:
 
 clean:
 	rm -f $(PBB_MAIN) $(BENCH) $(BENCH)_debug $(BENCH)_nop
