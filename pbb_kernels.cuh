@@ -4,7 +4,6 @@
 #include <cuda_runtime.h>
 #include <cuda/atomic>
 #include <cuda/std/type_traits>
-using namespace cuda;
 /**
  * Naive memcpy kernel, for the purpose of comparing with
  * a more "realistic" bandwidth number.
@@ -823,20 +822,20 @@ publishDesc(uint32_t j, Status f, T v, Status* Fs, T* Ps, T* As, unsigned long l
         memcpy(&bits, &v, 8);
         // each half carries the flag: no order needed between the two stores
         //   (a reader that sees only one of them gets unequal flags)
-        atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j])
-            .store(((unsigned long long)f << 32) | (uint32_t)bits, memory_order_relaxed);
-        atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j + 1])
-            .store(((unsigned long long)f << 32) | (bits >> 32), memory_order_relaxed);
+        cuda::atomic_ref<unsigned long long, cuda::thread_scope_device>(Ds[2 * j])
+            .store(((unsigned long long)f << 32) | (uint32_t)bits, cuda::memory_order_relaxed);
+        cuda::atomic_ref<unsigned long long, cuda::thread_scope_device>(Ds[2 * j + 1])
+            .store(((unsigned long long)f << 32) | (bits >> 32), cuda::memory_order_relaxed);
     } else if constexpr (PACKED) {
         uint32_t bits = 0;
         memcpy(&bits, &v, sizeof(T));     // copy the bits: a numeric cast would truncate floats
         // flag and value travel in one 64-bit store: nothing to order between them
-        atomic_ref<unsigned long long, thread_scope_device>(Ds[j])
-            .store(((unsigned long long)f << 32) | bits, memory_order_relaxed);
+        cuda::atomic_ref<unsigned long long, cuda::thread_scope_device>(Ds[j])
+            .store(((unsigned long long)f << 32) | bits, cuda::memory_order_relaxed);
     } else {
         if (f == P) Ps[j] = v; else As[j] = v;
         // release: the value store above becomes visible no later than the flag (I5 writer)
-        atomic_ref<Status, thread_scope_device>(Fs[j]).store(f, memory_order_release);
+        cuda::atomic_ref<Status, cuda::thread_scope_device>(Fs[j]).store(f, cuda::memory_order_release);
     }
 }
 
@@ -846,24 +845,24 @@ __device__ inline Status
 loadDesc(int j, T& v, Status* Fs, T* Ps, T* As, unsigned long long* Ds) {
     if constexpr (PACKED && sizeof(T) == 8) {
         // two independent loads, each with its own flag: nothing to order between them
-        unsigned long long lo = atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j])
-                                    .load(memory_order_relaxed);
-        unsigned long long hi = atomic_ref<unsigned long long, thread_scope_device>(Ds[2 * j + 1])
-                                    .load(memory_order_relaxed);
+        unsigned long long lo = cuda::atomic_ref<unsigned long long, cuda::thread_scope_device>(Ds[2 * j])
+                                    .load(cuda::memory_order_relaxed);
+        unsigned long long hi = cuda::atomic_ref<unsigned long long, cuda::thread_scope_device>(Ds[2 * j + 1])
+                                    .load(cuda::memory_order_relaxed);
         if ((lo >> 32) != (hi >> 32)) return X;  // halves of different publishes: not ready yet
         unsigned long long bits = (hi << 32) | (uint32_t)lo;
         memcpy(&v, &bits, 8);
         return (Status)(lo >> 32);
     } else if constexpr (PACKED) {
         // one 64-bit load returns flag and value together: nothing to order between them
-        unsigned long long w = atomic_ref<unsigned long long, thread_scope_device>(Ds[j])
-                                   .load(memory_order_relaxed);
+        unsigned long long w = cuda::atomic_ref<unsigned long long, cuda::thread_scope_device>(Ds[j])
+                                   .load(cuda::memory_order_relaxed);
         uint32_t bits = (uint32_t)w;
         memcpy(&v, &bits, sizeof(T));     // low sizeof(T) bytes (little-endian), inverse of publishDesc
         return (Status)(w >> 32);
     } else {
         // acquire: the value load below cannot be performed before the flag load (I5 reader)
-        Status f = atomic_ref<Status, thread_scope_device>(Fs[j]).load(memory_order_acquire);
+        Status f = cuda::atomic_ref<Status, cuda::thread_scope_device>(Fs[j]).load(cuda::memory_order_acquire);
         if (f == P) v = Ps[j];
         else if (f == A) v = As[j];
         return f;

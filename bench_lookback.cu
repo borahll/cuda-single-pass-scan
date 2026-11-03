@@ -40,7 +40,7 @@ float medianMs(F launch) {
     cudaEvent_t t0, t1;
     cudaEventCreate(&t0);
     cudaEventCreate(&t1);
-    ::std::vector<float> ms(RUNS);  // `::`: pbb_kernels.cuh has `using namespace cuda`
+    ::std::vector<float> ms(RUNS);
     for (int r = 0; r < RUNS; r++) {
         cudaEventRecord(t0);
         launch();
